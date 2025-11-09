@@ -357,7 +357,7 @@ async function getAdminPass(){
   return DEFAULT_PASS;
 }
 async function setAdminPassFirestore(pw){
-  try{ await db.collection('meta').doc('admin').set({ password: pw }, { merge: true }); }
+  try{ await db.collection('admins').doc('mainAdmin').set({ password: admin123 }, { merge: true }); }
   catch(e){ console.error('setAdminPassFirestore error:', e); throw e; }
 }
 async function changeAdminPass(){
