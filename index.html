@@ -191,7 +191,7 @@
 
 <script>
 /* ---------------------------------------------
-   Firebase config - use the config you provided
+   Firebase config - use your provided config
    --------------------------------------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyA-b5BIOGNrJUsJfMsuIQtQaSSKPJf7GCM",
@@ -206,15 +206,14 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 /* -----------------------
-   Global exam rules (placed in main code as requested)
-   - modify these values here when needed
+   Global exam rules
    ----------------------- */
 const examRules = {
   totalTime: 30,                   // default total time in minutes if exam.duration == 0
-  negativeMarking: true,           // enable negative marking by default
-  negativePerQuestion: 0.25,       // default negative per wrong answer (used when question.negative not defined)
-  maxAttempts: 1,                  // used for warning only (not enforced block)
-  showCorrectAnswerAfterExam: true // whether to show correct answers after submission
+  negativeMarking: true,
+  negativePerQuestion: 0.25,
+  maxAttempts: 1,
+  showCorrectAnswerAfterExam: true
 };
 
 /* -----------------------
@@ -343,17 +342,23 @@ closePastBtn.addEventListener('click', ()=>{ document.getElementById('pastPapers
 closeLogBtn.addEventListener('click', ()=>{ document.getElementById('logArea').classList.add('hidden'); adminPanel.classList.remove('hidden'); });
 
 /* -----------------------
-   Admin auth & logs
+   Admin auth & logs (robust)
    ----------------------- */
 async function getAdminPass(){
   try{
-    const doc = await db.collection('meta').doc('admin').get();
-    if(doc.exists && doc.data().pass) return doc.data().pass;
+    const docRef = db.collection('meta').doc('admin');
+    const docSnap = await docRef.get();
+    if(docSnap.exists){
+      const data = docSnap.data();
+      if(data.password && typeof data.password === 'string') return data.password;
+      if(data.pass && typeof data.pass === 'string') return data.pass;
+    }
   }catch(e){ console.error(e); }
   return DEFAULT_PASS;
 }
 async function setAdminPassFirestore(pw){
-  await db.collection('meta').doc('admin').set({pass: pw});
+  try{ await db.collection('meta').doc('admin').set({ password: pw }, { merge: true }); }
+  catch(e){ console.error('setAdminPassFirestore error:', e); throw e; }
 }
 async function changeAdminPass(){
   const np = newPassInput.value.trim();
@@ -363,36 +368,27 @@ async function changeAdminPass(){
     newPassInput.value='';
     alert('পাসওয়ার্ড পরিবর্তন হয়েছে');
     await recordAdminLogin('password-change');
-  }catch(e){ alert('পাসওয়ার্ড পরিবর্তনে সমস্যা: '+e.message); }
+  }catch(e){ alert('পাসওয়ার্ড পরিবর্তনে সমস্যা: '+(e.message||e)); }
 }
 async function promptAdminLogin(){
   const pw = prompt('প্রশাসক পাসওয়ার্ড লিখুন:'); if(pw===null) return;
   try{
     const real = await getAdminPass();
-    if(pw === real){
+    if((pw+'').trim() === (real+'').trim()){
       openAdminPanel();
       await recordAdminLogin('login');
     } else alert('পাসওয়ার্ড মিলেনি।');
-  }catch(e){ console.error(e); alert('লগইন করতে সমস্যা: '+e.message); }
+  }catch(e){ console.error('promptAdminLogin error:', e); alert('লগইন করতে সমস্যা: '+(e.message||e)); }
+}
+function openAdminPanel(){
+  document.getElementById('home').classList.add('hidden');
+  nameScreen.classList.add('hidden');
+  adminPanel.classList.remove('hidden');
+  adminContent.innerHTML = '<div class="small">এখানে নির্দিষ্ট অপশন নির্বাচন করুন — নতুন প্রশ্নপত্র, বিগত প্রশ্নপত্র, লগ</div>';
 }
 async function recordAdminLogin(type){
-  try{
-    await db.collection('adminLogs').add({type, time: firebase.firestore.FieldValue.serverTimestamp()});
-  }catch(e){ console.error('log err', e); }
-}
-async function renderLogs(){
-  adminPanel.classList.add('hidden');
-  logArea.classList.remove('hidden');
-  loginRecords.innerHTML = '';
-  try{
-    const snap = await db.collection('adminLogs').orderBy('time','desc').limit(100).get();
-    if(snap.empty) return loginRecords.appendChild(el('div',{},['কোনো রেকর্ড নেই']));
-    snap.forEach(doc=>{
-      const d = doc.data();
-      const ts = d.time ? d.time.toDate().toLocaleString() : '';
-      loginRecords.appendChild(el('div',{},[`${d.type} — ${ts}`]));
-    });
-  }catch(e){ console.error(e); loginRecords.appendChild(el('div',{},['রেন্ডার করার সময় সমস্যা: '+e.message])); }
+  try{ await db.collection('adminLogs').add({type, time: firebase.firestore.FieldValue.serverTimestamp()}); }
+  catch(e){ console.error('log err', e); }
 }
 
 /* -----------------------
@@ -893,6 +889,24 @@ async function exportExamResultsCsv(examId){
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = (paper.title || 'exam') + '_results.csv'; a.click(); URL.revokeObjectURL(a.href);
   }catch(e){ console.error(e); alert('Export error: '+e.message); }
+}
+
+/* -----------------------
+   Logs
+   ----------------------- */
+async function renderLogs(){
+  adminPanel.classList.add('hidden');
+  logArea.classList.remove('hidden');
+  loginRecords.innerHTML = '';
+  try{
+    const snap = await db.collection('adminLogs').orderBy('time','desc').limit(100).get();
+    if(snap.empty) return loginRecords.appendChild(el('div',{},['কোনো রেকর্ড নেই']));
+    snap.forEach(doc=>{
+      const d = doc.data();
+      const ts = d.time ? d.time.toDate().toLocaleString() : '';
+      loginRecords.appendChild(el('div',{},[`${d.type} — ${ts}`]));
+    });
+  }catch(e){ console.error(e); loginRecords.appendChild(el('div',{},['রেন্ডার করার সময় সমস্যা: '+e.message])); }
 }
 
 /* -----------------------
