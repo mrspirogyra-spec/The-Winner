@@ -24,7 +24,12 @@
   .timer{font-weight:700;color:#b00}
   .small{font-size:13px;color:#666}
   .actions{display:flex;gap:8px;flex-wrap:wrap}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{border:1px solid #ddd;padding:6px;text-align:left;font-size:13px}
+  th{background:#fafafa}
+  pre {white-space:pre-wrap}
   @media(max-width:720px){ .row{flex-direction:column} }
+  footer{margin-top:18px;text-align:center;font-size:13px;color:#333}
 </style>
 </head>
 <body>
@@ -37,9 +42,7 @@
   <!-- Home -->
   <div id="home" class="card center">
     <h2>The Winner</h2>
-    <p class="small">কোচিং-এর MCQ পরীক্ষার জন্য সহজ ফ্রন্ট-এন্ড টুল (GitHub Pages-এ হোস্ট করা যেতে পারে)</p>
     <div><button id="startExamBtn">পরীক্ষা শুরু করুন</button></div>
-    <div class="small">নোট: প্রশ্নপত্র ও অ্যাডমিন পাসওয়ার্ড আপনার ব্রাউজারের localStorage-এ রাখা হবে।</div>
   </div>
 
   <!-- Name / Choose exam -->
@@ -56,15 +59,16 @@
     </div>
     <div style="margin-top:12px" class="actions">
       <button id="beginBtn">শুরু করুন</button>
-      <button id="backToHome">বাতিল</button>
+      <button id="backToHome">Back</button>
     </div>
     <hr/>
     <div id="instrArea">
       <h4>পরীক্ষার নির্দেশনা</h4>
       <ol id="defaultInstr">
-        <li>প্রতি প্রশ্নের মান: প্রশ্নে নির্ধারিত পয়েন্ট (ডিফল্ট 1)।</li>
-        <li>ভুল উত্তরে নেগেটিভ মার্কিং প্রয়োগ হবে (প্রতি প্রশ্নে আলাদা ভাবে নির্ধারণ করা যাবে)।</li>
-        <li>পরীক্ষা শেষ হলে সব প্রশ্নের সঠিক উত্তরসহ ফলাফল দেখানো হবে।</li>
+        <li>প্রতি ভুল উত্তরের জন্য নেগেটিভ মার্ক (০.৫/০.২৫) রয়েছে।</li>
+        <li>সময় শেষ হলে অটোমেটিক সাবমিট হয়ে যাবে।</li>
+        <li>একজন পরীক্ষার্থী এক বারের বেশি অংশগ্রহণ করতে পারবেন না। একাধিকবার চেষ্টা করলে ইউজার ব্লক হয়ে যাবে।</li>
+        <li>এই সাইটটি এখনো পরীক্ষামূলক পর্যায়ে আছে তাই কিছু সমস্যা বা অসংগতি দেখা যেতে পারে।</li>
       </ol>
     </div>
   </div>
@@ -92,7 +96,7 @@
     <hr/>
     <div id="detailedAnswers"></div>
     <div style="text-align:right;margin-top:12px">
-      <button id="backHomeBtn">হোমে ফিরে যান</button>
+      <button id="backHomeBtn">Back</button>
     </div>
   </div>
 
@@ -115,7 +119,7 @@
 
     <div id="adminContent" style="margin-top:12px"></div>
 
-    <div style="text-align:right;margin-top:12px"><button id="closeAdmin">বন্ধ</button></div>
+    <div style="text-align:right;margin-top:12px"><button id="closeAdmin">Back</button></div>
   </div>
 
   <!-- Create paper area -->
@@ -135,9 +139,9 @@
     <div id="questionsEditor" style="margin-top:12px"></div>
 
     <div style="margin-top:12px" class="actions">
-      <button id="addQuestionBtn">কথ্য যোগ করুন</button>
+      <button id="addQuestionBtn">প্রশ্ন যোগ করুন</button>
       <button id="savePaperBtn">সংরক্ষণ</button>
-      <button id="cancelCreateBtn">বাতিল</button>
+      <button id="cancelCreateBtn">Back</button>
     </div>
   </div>
 
@@ -145,17 +149,22 @@
   <div id="pastPapersArea" class="card hidden">
     <h3>বিগত প্রশ্নপত্র</h3>
     <div id="papersList"></div>
-    <div style="text-align:right;margin-top:12px"><button id="closePastBtn">বাতিল</button></div>
+    <hr/>
+    <div id="resultsArea"></div>
+    <div style="text-align:right;margin-top:12px"><button id="closePastBtn">Back</button></div>
   </div>
 
   <!-- Logs -->
   <div id="logArea" class="card hidden">
     <h3>প্রশাসক লগ</h3>
     <div id="loginRecords"></div>
-    <div style="text-align:right;margin-top:12px"><button id="closeLogBtn">বাতিল</button></div>
+    <div style="text-align:right;margin-top:12px"><button id="closeLogBtn">Back</button></div>
   </div>
 
-  <footer style="text-align:center;margin-top:18px" class="small">Made with ❤️ — The Winner</footer>
+  <footer>
+    <div>Developed by Subroto Howlader</div>
+    <div>Copyright © 2025</div>
+  </footer>
 </div>
 
 <script>
@@ -245,14 +254,12 @@ const cancelCreateBtn = document.getElementById('cancelCreateBtn');
 
 const pastPapersArea = document.getElementById('pastPapersArea');
 const papersList = document.getElementById('papersList');
+const resultsArea = document.getElementById('resultsArea');
 const closePastBtn = document.getElementById('closePastBtn');
 
 const logArea = document.getElementById('logArea');
 const loginRecords = document.getElementById('loginRecords');
 const closeLogBtn = document.getElementById('closeLogBtn');
-
-const adminLoginBtn = document.getElementById('adminBtn');
-const adminPanelBtn = document.getElementById('adminBtn');
 
 /* -----------------------
    Init / event wiring
@@ -270,8 +277,8 @@ downloadCsvBtn.addEventListener('click', ()=>{ if(!lastResult) return alert('ক
 backHomeBtn.addEventListener('click', ()=>{ goHome(); });
 
 createPaperBtn.addEventListener('click', ()=>{ openCreatePaper(); });
-viewPapersBtn.addEventListener('click', ()=>{ renderPapersList(); openPanelSection('past'); });
-viewLogBtn.addEventListener('click', ()=>{ renderLogs(); openPanelSection('log'); });
+viewPapersBtn.addEventListener('click', ()=>{ renderPapersList(); });
+viewLogBtn.addEventListener('click', ()=>{ renderLogs(); });
 
 closeAdmin.addEventListener('click', ()=>{ closeAdminPanel(); });
 changePassBtn.addEventListener('click', ()=>{ const np = newPassInput.value.trim(); if(!np) return alert('নতুন পাসওয়ার্ড দিন'); setAdminPass(np); newPassInput.value=''; alert('পাসওয়ার্ড পরিবর্তন হয়েছে'); recordAdminLogin('password-change'); });
@@ -280,7 +287,7 @@ addQuestionBtn.addEventListener('click', ()=>{ addQuestionEditor(); });
 savePaperBtn.addEventListener('click', ()=>{ saveCurrentPaper(); });
 cancelCreateBtn.addEventListener('click', ()=>{ closeCreatePaper(); });
 
-closePastBtn.addEventListener('click', ()=>{ document.getElementById('pastPapersArea').classList.add('hidden'); adminPanel.classList.remove('hidden'); });
+closePastBtn.addEventListener('click', ()=>{ document.getElementById('pastPapersArea').classList.add('hidden'); adminPanel.classList.remove('hidden'); resultsArea.innerHTML=''; });
 closeLogBtn.addEventListener('click', ()=>{ document.getElementById('logArea').classList.add('hidden'); adminPanel.classList.remove('hidden'); });
 
 /* -----------------------
@@ -304,6 +311,7 @@ function goHome(){
   nameScreen.classList.add('hidden');
   createPaperArea.classList.add('hidden');
   pastPapersArea.classList.add('hidden');
+  resultsArea.innerHTML = '';
   logArea.classList.add('hidden');
   adminPanel.classList.add('hidden');
   home.classList.remove('hidden');
@@ -401,7 +409,7 @@ function renderQuestionsEditor(){
     const negSelect = el('select',{});
     [0,0.25,0.5].forEach(v=>{
       const o = el('option',{value:v},[String(v)]);
-      if(item.negative === v) o.selected = true;
+      if(Number(item.negative) === Number(v)) o.selected = true;
       negSelect.appendChild(o);
     });
     negSelect.value = item.negative;
@@ -419,7 +427,7 @@ function renderQuestionsEditor(){
 }
 
 /* -----------------------
-   Save paper
+   Save paper (create or overwrite)
    ----------------------- */
 function saveCurrentPaper(){
   const title = paperTitleInput.value.trim();
@@ -433,11 +441,14 @@ function saveCurrentPaper(){
     }
   }
   const duration = Math.max(0, parseInt(paperDurationInput.value || 0));
-  const key = PAP_PREFIX + Date.now();
+  // overwrite if editKey present
+  const editKey = createPaperArea.dataset.editKey;
+  const key = editKey || (PAP_PREFIX + Date.now());
   const obj = { title, questions: examQuestions.slice(), created: new Date().toISOString(), duration };
   savePaperObj(key, obj);
   alert('প্রশ্নপত্র সংরক্ষণ হয়েছে');
-  // reset
+  // cleanup
+  delete createPaperArea.dataset.editKey;
   paperTitleInput.value='';
   paperDurationInput.value='0';
   examQuestions = [];
@@ -453,6 +464,7 @@ function renderPapersList(){
   adminPanel.classList.add('hidden');
   pastPapersArea.classList.remove('hidden');
   papersList.innerHTML = '';
+  resultsArea.innerHTML = '';
   const keys = getPapersKeys();
   if(keys.length===0){ papersList.appendChild(el('div',{},['কোনো প্রশ্নপত্র সংরক্ষিত নেই'])); return; }
   keys.forEach(k=>{
@@ -467,9 +479,11 @@ function renderPapersList(){
     btnCopy.addEventListener('click', ()=>{ copyExamLink(k); });
     const btnExport = el('button',{},['এক্সপোর্ট JSON']);
     btnExport.addEventListener('click', ()=>{ exportExamJson(k); });
+    const btnReport = el('button',{},['রিপোর্ট দেখুন']);
+    btnReport.addEventListener('click', ()=>{ renderResultsForExam(k); });
     const btnDelete = el('button',{},['ডিলিট']);
-    btnDelete.addEventListener('click', ()=>{ if(confirm('মুছে ফেলবেন?')){ localStorage.removeItem(k); renderPapersList(); populateExamSelect(); }});
-    const actions = el('div',{class:'actions'},[btnLoad, btnCopy, btnExport, btnDelete]);
+    btnDelete.addEventListener('click', ()=>{ if(confirm('মুছে ফেলবেন?')){ localStorage.removeItem(k); localStorage.removeItem(k + '_results'); renderPapersList(); populateExamSelect(); }});
+    const actions = el('div',{class:'actions'},[btnLoad, btnCopy, btnExport, btnReport, btnDelete]);
     row.appendChild(info); row.appendChild(actions); papersList.appendChild(row);
   });
 }
@@ -484,29 +498,8 @@ function loadPaperForAdmin(key){
   paperDurationInput.value = o.duration || 0;
   examQuestions = JSON.parse(JSON.stringify(o.questions || [])); // clone
   renderQuestionsEditor();
-  // also allow saving as new or overwrite? We'll overwrite if user saves: implement overwrite by deleting old key and saving new
-  // To implement overwrite, store the key into a hidden field
+  // set edit key so save will overwrite
   createPaperArea.dataset.editKey = key;
-  savePaperBtn.removeEventListener('click', saveCurrentPaperBinding);
-  savePaperBtn.addEventListener('click', saveCurrentPaperBinding = function saveCurrentPaperBinding(){
-    // overwrite path
-    const title = paperTitleInput.value.trim();
-    if(!title) return alert('শিরোনাম দিন');
-    if(examQuestions.length === 0) return alert('প্রশ্ন নেই');
-    for(const [i,q] of examQuestions.entries()){
-      if(!q.q.trim()) return alert(`প্রশ্ন ${i+1} খালি`);
-      for(const [j,opt] of q.options.entries()) if(!String(opt).trim()) return alert(`প্রশ্ন ${i+1} অপশন ${j+1} খালি`);
-    }
-    const duration = Math.max(0, parseInt(paperDurationInput.value || 0));
-    const key = createPaperArea.dataset.editKey || (PAP_PREFIX + Date.now());
-    const obj = { title, questions: examQuestions.slice(), created: new Date().toISOString(), duration };
-    savePaperObj(key, obj);
-    // cleanup
-    delete createPaperArea.dataset.editKey;
-    alert('প্রশ্নপত্র সংরক্ষণ হয়েছে (overwrite)'); populateExamSelect(); renderPapersList();
-    createPaperArea.classList.add('hidden'); adminPanel.classList.remove('hidden');
-    savePaperBtn.removeEventListener('click', saveCurrentPaperBinding);
-  });
 }
 
 /* -----------------------
@@ -521,6 +514,28 @@ function exportExamJson(key){
   const data = JSON.stringify(obj, null, 2);
   const blob = new Blob([data], {type:'application/json'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (obj.title || 'exam') + '.json'; a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* -----------------------
+   Results storage (LocalStorage)
+   ----------------------- */
+function saveResultToStorage(paperKey, resultObj){
+  const key = paperKey + '_results';
+  const arr = JSON.parse(localStorage.getItem(key) || '[]');
+  arr.push(resultObj);
+  localStorage.setItem(key, JSON.stringify(arr));
+}
+/* mark blocked */
+function blockUserForPaper(paperKey, username){
+  const bkey = paperKey + '_blocked';
+  const arr = JSON.parse(localStorage.getItem(bkey) || '[]');
+  if(!arr.includes(username)) arr.push(username);
+  localStorage.setItem(bkey, JSON.stringify(arr));
+}
+function isUserBlocked(paperKey, username){
+  const bkey = paperKey + '_blocked';
+  const arr = JSON.parse(localStorage.getItem(bkey) || '[]');
+  return arr.includes(username);
 }
 
 /* -----------------------
@@ -543,6 +558,19 @@ function beginExamFlow(){
   if(!candidateName) return alert('নাম লিখুন');
   const key = examSelect.value;
   if(!key) return alert('প্রশাসক প্রথমে প্রশ্নপত্র তৈরি করুন');
+  // blocked check
+  if(isUserBlocked(key, candidateName)){
+    return alert('আপনি ব্লক হয়েছেন — একাধিকবার চেষ্টা করার কারণে পরীক্ষায় অংশগ্রহণ করা যাবে না।');
+  }
+  const resultsKey = key + '_results';
+  const prev = JSON.parse(localStorage.getItem(resultsKey) || '[]');
+  // if previous attempt exists, block and prevent
+  if(prev.some(r => (r.candidate || '').toLowerCase() === candidateName.toLowerCase())){
+    // mark blocked
+    blockUserForPaper(key, candidateName);
+    return alert('আপনি ইতিমধ্যে এই পরীক্ষায় অংশগ্রহণ করেছেন। দ্বিতীয়বারের চেষ্টা করার কারণে আপনি ব্লক করা হলেন।');
+  }
+
   currentPaper = key;
   const paper = readPaperObj(key);
   if(!paper) return alert('প্রশ্নপত্র পাওয়া যায়নি');
@@ -567,6 +595,7 @@ function renderExam(title){
   questionsArea.innerHTML = '';
   examQuestions.forEach((q, i)=>{
     const qblock = el('div',{class:'question'});
+    // serial number provided
     qblock.appendChild(el('div',{},[`${i+1}. ${q.q}`]));
     const opts = el('div');
     q.options.forEach((opt, j)=>{
@@ -578,9 +607,8 @@ function renderExam(title){
       line.appendChild(radio); line.appendChild(label);
       opts.appendChild(line);
     });
-    // points info
-    const small = el('div',{class:'small'},[`এই প্রশ্নের মান: ${q.point} — ভুল হলে বিয়োগ: ${q.negative}`]);
-    qblock.appendChild(opts); qblock.appendChild(small);
+    // NOTE: removed per-question points display as requested
+    qblock.appendChild(opts);
     questionsArea.appendChild(qblock);
   });
 }
@@ -595,7 +623,7 @@ function startTimer(seconds){
     updateTimerDisplay();
     if(timeLeftSeconds <= 0){
       clearInterval(examTimer);
-      alert('সময় শেষ — পরীক্ষা স্বয়ংক্রিয়ভাবে সাবমিট হচ্ছে।');
+      alert('সময় শেষ — পরীক্ষা স্বয়ংক্রিয়ভাবে সাবমিট হচ্ছে।');
       submitExam();
     }
   }, 1000);
@@ -625,8 +653,10 @@ function submitExam(){
     else if(chosen === q.ans){ correct++; totalScore += Number(q.point || 0); perQuestion.push(Number(q.point||0)); }
     else { wrong++; const neg = Number(q.negative || 0); totalScore -= neg; perQuestion.push(-neg); }
   });
-  // don't force clamp; but ensure toFixed in view
+  // compose result
   lastResult = { paperId: currentPaper, candidate: candidateName, date: new Date().toISOString(), total: totalScore, correct, wrong, perQuestion, answers };
+  // save into localStorage for that paper's results
+  saveResultToStorage(currentPaper, lastResult);
   // show result
   examScreen.classList.add('hidden');
   resultScreen.classList.remove('hidden');
@@ -635,7 +665,7 @@ function submitExam(){
 }
 
 /* -----------------------
-   Detailed answers & CSV
+   Detailed answers & CSV (participant)
    ----------------------- */
 function renderDetailedAnswers(){
   detailedAnswers.innerHTML = '';
@@ -681,6 +711,82 @@ function downloadResultCsv(result){
 }
 
 /* -----------------------
+   Render results for an exam (admin) — simple table: Name | Score
+   ----------------------- */
+function renderResultsForExam(paperKey){
+  resultsArea.innerHTML = '';
+  const paper = readPaperObj(paperKey);
+  if(!paper) return alert('প্রশ্নপত্র পাওয়া যায়নি');
+  const resultsKey = paperKey + '_results';
+  const arr = JSON.parse(localStorage.getItem(resultsKey) || '[]');
+  const title = el('h4',{},[ `${paper.title} — রিপোর্ট (${arr.length} জন অংশগ্রহণকারী)` ]);
+  const btnExport = el('button',{},['Export CSV']);
+  btnExport.addEventListener('click', ()=>{ exportExamResultsCsv(paperKey); });
+  const btnBack = el('button',{},['Back to list']);
+  btnBack.addEventListener('click', ()=>{ resultsArea.innerHTML=''; });
+  resultsArea.appendChild(title);
+  resultsArea.appendChild(btnExport);
+  resultsArea.appendChild(btnBack);
+
+  if(arr.length===0){
+    resultsArea.appendChild(el('div',{},['কোনো অংশগ্রহণকারীর ফলাফল নেই'])); return;
+  }
+
+  const table = el('table');
+  const thead = el('thead');
+  const headerRow = el('tr');
+  ['#','Name','Score'].forEach(h=> headerRow.appendChild(el('th',{},[h])));
+  thead.appendChild(headerRow); table.appendChild(thead);
+  const tbody = el('tbody');
+  arr.forEach((res, idx)=>{
+    const tr = el('tr');
+    tr.appendChild(el('td',{},[String(idx+1)]));
+    tr.appendChild(el('td',{},[res.candidate || '']));
+    tr.appendChild(el('td',{},[ String(res.total) ]));
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  resultsArea.appendChild(table);
+}
+
+/* -----------------------
+   Export exam results (admin CSV)
+   ----------------------- */
+function exportExamResultsCsv(paperKey){
+  const paper = readPaperObj(paperKey);
+  if(!paper) return alert('প্রশ্নপত্র পাওয়া যায়নি');
+  const resultsKey = paperKey + '_results';
+  const arr = JSON.parse(localStorage.getItem(resultsKey) || '[]');
+  if(arr.length===0) return alert('কোনো ফলাফল নেই');
+
+  // header
+  const headers = ['Name','Date','Total','Correct','Wrong'];
+  for(let i=0;i<paper.questions.length;i++){
+    headers.push(`Q${i+1}_Your`);
+    headers.push(`Q${i+1}_Correct`);
+    headers.push(`Q${i+1}_Score`);
+  }
+  const rows = [headers];
+  arr.forEach(res=>{
+    const row = [res.candidate || '', res.date, String(res.total), String(res.correct), String(res.wrong)];
+    for(let q=0;q<paper.questions.length;q++){
+      const your = (res.answers[q] === null || res.answers[q]===undefined) ? '' : (paper.questions[q].options[res.answers[q]] || '');
+      const correct = paper.questions[q].options[paper.questions[q].ans] || '';
+      const score = String(res.perQuestion[q] || 0);
+      row.push(your, correct, score);
+    }
+    rows.push(row);
+  });
+
+  const csv = rows.map(r => r.map(c=>escapeCsv(c)).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (paper.title || 'exam') + '_results.csv';
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* -----------------------
    Logs
    ----------------------- */
 function renderLogs(){
@@ -701,14 +807,12 @@ function renderLogs(){
 function handleQueryParam(){
   const params = new URLSearchParams(window.location.search);
   const examParam = params.get('exam');
+  populateExamSelect();
   if(examParam && localStorage.getItem(examParam)){
     // preselect exam and show name screen
     showNameScreen();
-    populateExamSelect();
     examSelect.value = examParam;
     // name still required
-  } else {
-    populateExamSelect();
   }
 }
 
@@ -726,7 +830,8 @@ window._tw = {
   listExams: getPapersKeys,
   readExam: readPaperObj,
   copyExamLink,
-  exportExamJson
+  exportExamJson,
+  exportExamResultsCsv
 };
 </script>
 </body>
