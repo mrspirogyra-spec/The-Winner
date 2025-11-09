@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>The Winner — MCQ</title>
+<title>The Winner - Job Preparation</title>
 <style>
   :root{--accent:#1b6;--bg:#f7f7fb;--card:#fff;--muted:#556}
   body{font-family:Inter, "Noto Sans Bengali", Arial, sans-serif;margin:0;background:var(--bg);color:#111}
@@ -179,7 +179,7 @@
 
   <footer>
     <div>Developed by Subroto Howlader</div>
-    <div style="color:blue">Copyright © 2025 The Winner</div>
+    <div style="color:blue">© 2025 © 2025 All rights reseverd । The Winner</div>
   </footer>
 </div>
 
@@ -194,7 +194,7 @@
    Firebase config - use your provided config
    --------------------------------------------- */
 const firebaseConfig = {
-  apiKey: "AIzaSyA-b5BIOGNrJUsJfMsuIQtQaSSKPJf7GCM",
+  apiKey: "AIzaSyDJQxrCu5rS6xqqWJ4NEVRZ_CDceXmqHkk",
   authDomain: "the-winner-3e9ad.firebaseapp.com",
   projectId: "the-winner-3e9ad",
   storageBucket: "the-winner-3e9ad.firebasestorage.app",
@@ -658,7 +658,7 @@ async function beginExamFlow(){
     const attemptsSnap = await db.collection('exams').doc(key).collection('results').where('candidate','==',candidateName).get();
     if(!attemptsSnap.empty && attemptsSnap.size >= (examRules.maxAttempts || 1)){
       // warning only — not enforcing block
-      alert(`সতর্কতা: আপনি ইতিপূর্বে এই পরীক্ষায় ${attemptsSnap.size} বার অংশগ্রহণ করেছেন। (নীচে নির্দেশনায় একাধিকবার অংশগ্রহণ নাও করার কথা বলা আছে)`);
+      alert(`সতর্কতা: আপনি ইতিপূর্বে এই পরীক্ষায় ${attemptsSnap.size} বার অংশগ্রহণ করেছেন। (নির্দেশনায় একাধিকবার অংশগ্রহণ করলে ব্লক হওয়ার সম্ভাবনার কথা উল্লেখ আছে)`);
     }
 
     // load questions and start exam
