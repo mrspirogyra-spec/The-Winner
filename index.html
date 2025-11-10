@@ -47,13 +47,11 @@
 </header>
 
 <div class="wrap">
-  <!-- Home -->
   <div id="home" class="card center">
     <h2>The Winner</h2>
     <div><button id="startExamBtn">পরীক্ষা শুরু করুন</button></div>
   </div>
 
-  <!-- Name / Choose exam -->
   <div id="nameScreen" class="card hidden">
     <div class="row" style="align-items:center">
       <div class="col">
@@ -72,7 +70,6 @@
     </div>
   </div>
 
-  <!-- Exam -->
   <div id="examScreen" class="card hidden">
     <div style="display:flex;justify-content:space-between;align-items:center">
       <h3 id="examTitle">পরীক্ষা</h3>
@@ -87,13 +84,11 @@
     </div>
   </div>
 
-  <!-- fixed clock (right-side) -->
   <div id="examClockFixed" class="hidden">
-    <div style="font-size:12px;color:#555">সময় বাকি</div>
+    <div style="font-size:12px;color:#555">সময় বাকি</div>
     <div id="fixedTimerDisplay" style="font-weight:700;color:#111;margin-top:6px"></div>
   </div>
 
-  <!-- Result -->
   <div id="resultScreen" class="card hidden">
     <h3>ফলাফল</h3>
     <div id="summary" class="small"></div>
@@ -109,7 +104,6 @@
     </div>
   </div>
 
-  <!-- Admin Panel -->
   <div id="adminPanel" class="card hidden">
     <h3>প্রশাসক প্যানেল</h3>
     <div class="row" style="display:flex;gap:8px">
@@ -126,7 +120,6 @@
     <div style="text-align:right;margin-top:12px"><button id="closeAdmin">Back</button></div>
   </div>
 
-  <!-- Create paper area -->
   <div id="createPaperArea" class="card hidden">
     <h3>নতুন প্রশ্নপত্র</h3>
     <div style="display:flex;gap:8px">
@@ -161,7 +154,6 @@
     </div>
   </div>
 
-  <!-- Past papers area -->
   <div id="pastPapersArea" class="card hidden">
     <h3>বিগত প্রশ্নপত্র</h3>
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
@@ -174,18 +166,16 @@
     <div style="text-align:right;margin-top:12px"><button id="closePastBtn">Back</button></div>
   </div>
 
-  <!-- Logs -->
   <div id="logArea" class="card hidden">
     <h3>প্রশাসক লগ</h3>
     <div id="loginRecords"></div>
     <div style="text-align:right;margin-top:12px"><button id="closeLogBtn">Back</button></div>
   </div>
-<div>Developed by Subroto Howlader</div>
-    <div style="color:blue">Copyright © 2025 All rights reseverd ।। The Winner</div>
-  </footer>
+  <div>Developed by Subroto Howlader</div>
+  <div style="color:blue">Copyright © 2025 All rights reseverd ।। The Winner</div>
+</footer>
 </div>
 
-<!-- Firebase libs -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -235,6 +225,7 @@ const examTimes = document.getElementById('examTimes');
 
 const examScreen = document.getElementById('examScreen');
 const examTitleEl = document.getElementById('examTitle');
+const examClock = document.getElementById('examClock'); // <<-- নিশ্চিত করা হয়েছে
 const questionsArea = document.getElementById('questionsArea');
 const submitExamBtn = document.getElementById('submitExamBtn');
 
@@ -447,8 +438,8 @@ async function saveCurrentPaper(){
       endTime: endTS || null,
       authorName: author
     };
-    if(editKey){ await db.collection('exams').doc(editKey).set(payload, {merge:true}); alert('প্রশ্নপত্র আপডেট হয়'); delete createPaperArea.dataset.editKey; }
-    else{ await db.collection('exams').add(payload); alert('প্রশ্নপত্র সংরক্ষণ হয়েছে'); }
+    if(editKey){ await db.collection('exams').doc(editKey).set(payload, {merge:true}); alert('প্রশ্নপত্র আপডেট হয়'); delete createPaperArea.dataset.editKey; }
+    else{ await db.collection('exams').add(payload); alert('প্রশ্নপত্র সংরক্ষণ হয়েছে'); }
     await db.collection('authors').doc(author).set({ lastModified: firebase.firestore.FieldValue.serverTimestamp() }, { merge:true });
     examQuestions = []; renderQuestionsEditor(); closeCreatePaper(); populateExamSelect(); populateAuthorSuggestions();
   }catch(e){ console.error(e); alert('সেভ করতে সমস্যা: '+e.message); }
@@ -467,7 +458,7 @@ async function renderPapersList(){
     snap.forEach(doc=>{
       const o = doc.data(); const k = doc.id;
       const row = el('div',{},[]); row.style.marginBottom='8px'; row.style.padding='8px'; row.style.borderBottom='1px solid #f3f3f3';
-      const info = el('div',{},[ `${o.title} — ${o.questions.length} প্রশ্ন — সময়: ${o.duration} মিনিট — প্রশ্নকর্তা: ${o.authorName || '—'}` ]);
+      const info = el('div',{},[ `${o.title} — ${o.questions.length} প্রশ্ন — সময়: ${o.duration} মিনিট — প্রশ্নকর্তা: ${o.authorName || '—'}` ]);
       const btnLoad = el('button',{},['ইডিট/দেখুন']); btnLoad.addEventListener('click', ()=> loadPaperForAdmin(k) );
       const btnCopy = el('button',{},['লিংক কপি']); btnCopy.addEventListener('click', ()=> copyExamLink(k) );
       const btnPdf = el('button',{},['Make PDF']); btnPdf.addEventListener('click', ()=> makeExamPdf(k) );
@@ -482,7 +473,7 @@ async function renderPapersList(){
 async function loadPaperForAdmin(id){
   try{
     const doc = await db.collection('exams').doc(id).get();
-    if(!doc.exists) return alert('প্রশ্নপত্র পাওয়া যায়নি');
+    if(!doc.exists) return alert('প্রশ্নপত্র পাওয়া যায়নি');
     const o = doc.data();
     adminPanel.classList.add('hidden');
     createPaperArea.classList.remove('hidden');
@@ -502,12 +493,12 @@ async function loadPaperForAdmin(id){
    ----------------------- */
 function copyExamLink(key){
   const url = window.location.href.split('#')[0].split('?')[0] + '?exam=' + encodeURIComponent(key);
-  navigator.clipboard?.writeText(url).then(()=>{ alert('লিংক কপি হয়েছে:\n' + url); }).catch(()=>{ prompt('কপি করুন: Ctrl+C', url); });
+  navigator.clipboard?.writeText(url).then(()=>{ alert('লিংক কপি হয়েছে:\n' + url); }).catch(()=>{ prompt('কপি করুন: Ctrl+C', url); });
 }
 async function makeExamPdf(examId){
   try{
     const docSnap = await db.collection('exams').doc(examId).get();
-    if(!docSnap.exists) return alert('প্রশ্নপত্র পাওয়া যায়নি');
+    if(!docSnap.exists) return alert('প্রশ্নপত্র পাওয়া যায়নি');
     const data = docSnap.data();
     const win = window.open('', '_blank');
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>${(data.title||'Exam')}</title><style>body{font-family: Noto Sans Bengali, Arial, sans-serif; padding:20px;}</style></head><body><h2>${(data.title||'Exam')}</h2>`;
@@ -554,11 +545,11 @@ async function beginExamFlow(){
   currentPaperId = key;
   try{
     const doc = await db.collection('exams').doc(key).get();
-    if(!doc.exists) return alert('প্রশ্নপত্র পাওয়া যায়নি');
+    if(!doc.exists) return alert('প্রশ্নপত্র পাওয়া যায়নি');
     const paper = doc.data();
     const now = firebase.firestore.Timestamp.fromDate(new Date());
-    if(paper.startTime && now.seconds < paper.startTime.seconds) return alert('এই মডেল টেস্ট এখনও শুরু হয়নি।');
-    if(paper.endTime && now.seconds > paper.endTime.seconds) return alert('এই মডেল টেস্ট শেষ হয়েছে।');
+    if(paper.startTime && now.seconds < paper.startTime.seconds) return alert('এই মডেল টেস্ট এখনও শুরু হয়নি।');
+    if(paper.endTime && now.seconds > paper.endTime.seconds) return alert('এই মডেল টেস্ট শেষ হয়েছে।');
 
     examQuestions = JSON.parse(JSON.stringify(paper.questions || []));
     examQuestions = examQuestions.map(q => ({ q: q.q, options: q.options, ans: Number(q.ans), point: Number(q.point || 0), negative: (q.negative!==undefined?Number(q.negative):examRules.negativePerQuestion) }));
@@ -577,7 +568,7 @@ async function beginExamFlow(){
       const nowMs = Date.now();
       const endMs = paper.endTime.toDate().getTime();
       const maxLeft = Math.floor((endMs - nowMs)/1000);
-      if(maxLeft <= 0) return alert('এই মডেল টেস্ট শেষ হয়েছে।');
+      if(maxLeft <= 0) return alert('এই মডেল টেস্ট শেষ হয়েছে।');
       if(desiredSeconds > 0) timeLeftSeconds = Math.min(desiredSeconds, maxLeft);
       else timeLeftSeconds = maxLeft;
     } else { timeLeftSeconds = desiredSeconds; }
@@ -623,7 +614,7 @@ function startTimer(seconds){
     updateTimerDisplay();
     if(timeLeftSeconds <= 0){
       clearInterval(examTimer);
-      alert('সময় শেষ — পরীক্ষা স্বয়ংক্রিয়ভাবে সাবমিট হচ্ছে।');
+      alert('সময় শেষ — পরীক্ষা স্বয়ংক্রিয়ভাবে সাবমিট হচ্ছে।');
       submitExam();
     } else if(timeLeftSeconds <= 30){
       fixedTimerDisplay.classList.add('blinking');
@@ -692,7 +683,7 @@ async function submitExam(){
       rankHtml = `<div style="font-size:18px;font-weight:800;margin-top:6px">আপনি মোট ${totalParticipants} পরীক্ষার্থীর মধ্যে <span style="font-size:24px;color:#0b6b93">${rank} তম</span> অবস্থানে আছেন</div>`;
     }
 
-    summaryEl.innerHTML = `<div>সঠিক: <strong>${correct}</strong> — ভুল: <strong>${wrong}</strong></div><div style="margin-top:6px">মোট প্রাপ্ত নম্বর: <strong>${Number(totalScore).toString()}</strong></div>${rankHtml}`;
+    summaryEl.innerHTML = `<div>সঠিক: <strong>${correct}</strong> — ভুল: <strong>${wrong}</strong></div><div style="margin-top:6px">মোট প্রাপ্ত নম্বর: <strong>${Number(totalScore).toFixed(2)}</strong></div>${rankHtml}`;
     renderDetailedAnswers();
 
     const examDoc = await db.collection('exams').doc(currentPaperId).get();
@@ -757,8 +748,9 @@ function renderRatingSection(examId, paperTitle, authorName){
       form.querySelectorAll('.rate-star').forEach(s=>s.classList.remove('selected'));
       star.classList.add('selected');
       try{
+        // Result ID missing, so we record rating against exam ID and author name
         await db.collection('exams').doc(examId).collection('ratings').add({ author: authorName, rating: Number(i), date: firebase.firestore.FieldValue.serverTimestamp(), candidate: candidateName });
-        message.textContent = 'ধন্যবাদ! আপনার রেটিং সাবমিট হয়েছে।';
+        message.textContent = 'ধন্যবাদ! আপনার রেটিং সাবমিট হয়েছে।';
         populateAuthorSuggestions();
       }catch(e){ message.textContent = 'রেটিং সাবমিট করতে সমস্যা: '+(e.message||''); console.error(e); }
     });
@@ -774,7 +766,7 @@ async function renderResultsForExam(examId){
   resultsArea.innerHTML = ''; resultsArea.classList.remove('hidden');
   try{
     const doc = await db.collection('exams').doc(examId).get();
-    if(!doc.exists) return alert('প্রশ্নপত্র পাওয়া যায়নি');
+    if(!doc.exists) return alert('প্রশ্নপত্র পাওয়া যায়নি');
     const paper = doc.data();
     const title = el('h4',{},[ `${paper.title} — রিপোর্ট` ]);
     const btnExport = el('button',{},['Export CSV']); btnExport.addEventListener('click', ()=> exportExamResultsCsv(examId));
@@ -807,7 +799,7 @@ async function renderResultsForExam(examId){
 async function exportExamResultsCsv(examId){
   try{
     const examDoc = await db.collection('exams').doc(examId).get();
-    if(!examDoc.exists) return alert('প্রশ্নপত্র পাওয়া যায়নি');
+    if(!examDoc.exists) return alert('প্রশ্নপত্র পাওয়া যায়নি');
     const paper = examDoc.data();
     const snap = await db.collection('exams').doc(examId).collection('results').orderBy('date','desc').get();
     if(snap.empty) return alert('কোনো ফলাফল নেই');
@@ -826,7 +818,8 @@ async function exportExamResultsCsv(examId){
       rows.push(row);
     });
     const csv = rows.map(r => r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = (paper.title || 'exam') + '_results.csv'; a.click(); URL.revokeObjectURL(a.href);
   }catch(e){ console.error(e); alert('Export error: '+e.message); }
 }
@@ -846,7 +839,7 @@ async function showPaperRatings(examId){
 }
 
 /* -----------------------
-   Average rating per author
+   Average rating per author (all papers)
    ----------------------- */
 async function getAverageRatingForAuthor(authorName){
   try{
@@ -871,7 +864,7 @@ async function renderLogs(){
     const snap = await db.collection('adminLogs').orderBy('time','desc').limit(200).get();
     if(snap.empty) return loginRecords.appendChild(el('div',{},['কোনো রেকর্ড নেই']));
     snap.forEach(doc=>{ const d = doc.data(); const ts = d.time ? d.time.toDate().toLocaleString() : ''; loginRecords.appendChild(el('div',{},[`${d.creatorName || ''} — ${d.type} — ${ts}`])); });
-  }catch(e){ console.error(e); loginRecords.appendChild(el('div',{},['রেন্ডার করার সময় সমস্যা: '+e.message])); }
+  }catch(e){ console.error(e); loginRecords.appendChild(el('div',{},['রেন্ডার করার সময় সমস্যা: '+e.message])); }
 }
 
 /* -----------------------
@@ -907,20 +900,4 @@ window._tw = { makeExamPdf, populateExamSelect, populateAuthorSuggestions, rende
 
 </script>
 </body>
-</html>aders]; snap.forEach(doc=>{ const r = doc.data(); const row = [r.candidate || '', (r.date? r.date.toDate().toISOString():''), String(r.total), String(r.correct), String(r.wrong)]; for(let q=0;q<paper.questions.length;q++){ const your = (r.answers && r.answers[q] !== undefined && r.answers[q] !== null) ? (paper.questions[q].options[r.answers[q]] || '') : ''; const correct = paper.questions[q].options[paper.questions[q].ans] || ''; const score = String((r.perQuestion && r.perQuestion[q]) || 0); row.push(your, correct, score); } rows.push(row); }); const csv = rows.map(r => r.map(c=>escapeCsv(c)).join(',')).join('\n'); const blob = new Blob([csv], {type:'text/csv'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (paper.title || 'exam') + '_results.csv'; a.click(); URL.revokeObjectURL(a.href); }catch(e){ console.error(e); alert('Export error: '+e.message); } }
-
-/* ----------------------- Show paper ratings (admin) ----------------------- */ async function showPaperRatings(examId){ try{ const snap = await db.collection('exams').doc(examId).collection('ratings').get(); if(snap.empty) return alert('এই প্রশ্নপত্রে কোনো রেটিং নেই'); let total=0, count=0; const list=[]; snap.forEach(d=>{ const r=d.data(); total+= (r.rating||0); count++; list.push(r); }); const avg = (count? (total/count).toFixed(2):0); alert(Average rating: ${avg} (from ${count} ratings)); }catch(e){ console.error(e); alert('লোড করতে সমস্যা: '+e.message); } }
-
-/* ----------------------- Average rating per author (all papers) ----------------------- */ async function getAverageRatingForAuthor(authorName){ try{ const papersSnap = await db.collection('exams').where('authorName','==',authorName).get(); let total=0, count=0; for(const doc of papersSnap.docs){ const ratingsSnap = await db.collection('exams').doc(doc.id).collection('ratings').get(); ratingsSnap.forEach(r=>{ total += (r.data().rating||0); count++; }); } return count? (Math.round((total/count)*10)/10).toFixed(1) : '0.0'; }catch(e){ console.error(e); return '0.0'; } }
-
-/* ----------------------- Admin: results listing and logs ----------------------- */
-
-async function renderLogs(){ adminPanel.classList.add('hidden'); logArea.classList.remove('hidden'); loginRecords.innerHTML = ''; try{ const snap = await db.collection('adminLogs').orderBy('time','desc').limit(200).get(); if(snap.empty) return loginRecords.appendChild(el('div',{},['কোনো রেকর্ড নেই'])); snap.forEach(doc=>{ const d = doc.data(); const ts = d.time ? d.time.toDate().toLocaleString() : ''; loginRecords.appendChild(el('div',{},([${d.creatorName || ''} — ${d.type} — ${ts}]))); }); }catch(e){ console.error(e); loginRecords.appendChild(el('div',{},['রেন্ডার করার সময় সমস্যা: '+e.message])); } }
-
-/* ----------------------- Page load handling (query param) ----------------------- */ async function handleQueryParam(){ const params = new URLSearchParams(window.location.search); const examParam = params.get('exam'); await populateExamSelect(); await populateAuthorSuggestions(); if(examParam){ const option = Array.from(examSelect.options).find(o=>o.value===examParam); if(option){ showNameScreen(); examSelect.value = examParam; showExamTimes(examParam); } } } window.addEventListener('load', ()=>{ handleQueryParam().catch(e=>console.error(e)); });
-
-/* ----------------------- Navigation helpers ----------------------- */ function showNameScreen(){ document.getElementById('home').classList.add('hidden'); populateExamSelect(); nameScreen.classList.remove('hidden'); } function hideNameShowHome(){ nameScreen.classList.add('hidden'); document.getElementById('home').classList.remove('hidden'); } function goHome(){ clearInterval(examTimer); fixedTimerDisplay.textContent=''; resultScreen.classList.add('hidden'); examScreen.classList.add('hidden'); nameScreen.classList.add('hidden'); createPaperArea.classList.add('hidden'); pastPapersArea.classList.add('hidden'); resultsArea.innerHTML=''; logArea.classList.add('hidden'); adminPanel.classList.add('hidden'); document.getElementById('home').classList.remove('hidden'); }
-
-/* ----------------------- Expose helpers (debug) ----------------------- */ window._tw = { makeExamPdf, populateExamSelect, populateAuthorSuggestions }; </script></body>
-
-</html>>
+</html>
