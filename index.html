@@ -2,7 +2,7 @@
 <html lang="bn">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width-device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>The Winner - Job Preparation</title>
   <style>
     /* 7. রঙ ও স্টাইল নির্দেশিকা */
@@ -22,9 +22,9 @@
     header{background:var(--primary-blue);color:#fff;padding:14px 18px;text-align:center;position:relative;overflow:hidden; display:flex; justify-content:space-between; align-items:center;}
     header h1{margin:0;font-size:20px}
     .header-actions{display:flex; gap:10px; align-items:center;}
-    .wrap{max-width:980px;margin:22px auto;padding:0 16px; display:flex; gap:16px;}
-    .main-content{flex:3;}
-    .sidebar{flex:1; min-width:200px; padding:0;}
+    .wrap{max-width:980px;margin:22px auto;padding:0 16px; display:block; gap:16px;}
+    .main-content{width:100%;}
+    .sidebar{display:none;}
     .card{background:var(--card);border-radius:10px;padding:18px;box-shadow:0 8px 24px rgba(12,20,40,0.06); margin-bottom:16px;}
     .center{display:flex;flex-direction:column;align-items:center;gap:12px}
     button{background:var(--success-green);color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer; transition: background 0.2s;}
@@ -62,6 +62,9 @@
 </head>
 <body>
 <header>
+  <div class="header-actions" style="margin-right:auto;">
+    <button id="dashboardBtn" class="hidden" style="background:var(--primary-blue); border:1px solid #fff;">ড্যাশবোর্ড</button>
+  </div>
   <h1>The Winner</h1>
   <div class="header-actions">
     <button id="registerBtn" style="background:var(--primary-blue); border:1px solid #fff;">Registration</button>
@@ -72,10 +75,23 @@
 </header>
 
 <div class="wrap">
-  <div class="sidebar">
-    <div id="dashboardSidebar" class="card hidden">
-      <h3>ড্যাশবোর্ড</h3>
-      <div id="personalInfo">
+  <div class="sidebar hidden"></div>
+
+  <div class="main-content">
+    
+    <div id="home" class="card">
+      <h2>বর্তমান / আসন্ন পরীক্ষা</h2>
+      <div id="examListArea"></div>
+    </div>
+    
+    <div id="dashboardScreen" class="card hidden">
+      <h3>শিক্ষার্থীর ড্যাশবোর্ড</h3>
+      <div class="actions" style="margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+        <button id="viewPersonalInfoBtn" style="background:var(--primary-blue);">ব্যক্তিগত তথ্য</button>
+        <button id="viewPreviousExamsBtn">পূর্ববর্তী পরীক্ষা</button>
+      </div>
+
+      <div id="personalInfoSection" class="dashboard-section">
         <h4>ব্যক্তিগত তথ্য</h4>
         <div class="small">
           <p>নাম: <strong id="infoName"></strong></p>
@@ -84,20 +100,15 @@
           <p>পাসওয়ার্ড: <span id="infoPass" class="hidden"></span> <button id="togglePassBtn" class="small">দেখুন</button></p>
         </div>
       </div>
-      <hr style="margin:12px 0"/>
-      <div id="previousExams">
+      
+      <div id="previousExamsSection" class="dashboard-section hidden">
         <h4>পূর্ববর্তী পরীক্ষা</h4>
         <div id="prevExamsList" class="small"></div>
       </div>
-    </div>
-  </div>
 
-  <div class="main-content">
-    <div id="home" class="card">
-      <h2>বর্তমান / আসন্ন পরীক্ষা</h2>
-      <div id="examListArea"></div>
+      <div style="text-align:right;margin-top:12px"><button onclick="goHome()">Back</button></div>
     </div>
-    
+
     <div id="registrationScreen" class="card hidden">
       <h3>শিক্ষার্থী রেজিস্ট্রেশন</h3>
       <label>নাম</label><input id="regName" type="text" placeholder="আপনার নাম" />
@@ -143,7 +154,7 @@
       <h3>ফলাফল</h3>
       <div id="summary" class="small"></div>
       <div style="margin-top:8px" class="actions">
-        <button id="toggleMarksBtn">মার্কসহ উত্তর দেখুন</button>
+        <button id="toggleMarksBtn">মার্ক লুকান</button>
         <button id="downloadCsvBtn">CSV ডাউনলোড</button>
       </div>
       <hr/>
@@ -159,7 +170,8 @@
       <div class="row" style="display:flex;gap:8px">
         <button id="createPaperBtn">নতুন প্রশ্নপত্র তৈরি করুন</button>
         <button id="viewPapersBtn">বিগত প্রশ্নপত্র</button>
-        <button id="viewStudentsBtn">শিক্ষার্থী তালিকা</button> <button id="viewLogBtn">লগ রেকর্ড</button>
+        <button id="viewStudentsBtn">শিক্ষার্থী তালিকা</button>
+        <button id="viewLogBtn">লগ রেকর্ড</button>
       </div>
       <div style="margin-top:12px">
         <label>প্রশ্নকর্তার নাম (লগইন বা নির্বাচন)</label>
@@ -236,9 +248,12 @@
         <div style="text-align:right;margin-top:12px"><button id="closeStudentDashBtn">Back</button></div>
     </div>
 
-  </div> </div> <footer>
+  </div>
+</div>
+
+<footer>
   <div>Developed by Subroto Howlader</div>
-  <div style="color:var(--primary-blue)">Copyright © 2025 All rights reseverd ।। The Winner</div>
+  <div style="color:var(--primary-blue)">© 2025 All rights reseverd ।। The Winner</div>
 </footer>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -247,7 +262,7 @@
 
 <script>
 /* ============================
-   CONFIG - Replace with yours
+   CONFIG - REPLACE WITH YOUR FIREBASE CONFIGURATION
    ============================ */
 const firebaseConfig = {
   apiKey: "AIzaSyA-b5BIOGNrJUsJfMsuIQtQaSSKPJf7GCM",
@@ -265,11 +280,12 @@ const db = firebase.firestore();
    ----------------------- */
 const DEFAULT_PASS = 'admin123';
 const EXAM_RULES = { negativeMarking: true, negativePerQuestion: 0.25, totalTime: 30, maxAttempts: 1 };
-const USERS_COLLECTION = 'students'; // নতুন কালেকশন
+const USERS_COLLECTION = 'students';
 const EXAMS_COLLECTION = 'exams';
 
-let currentUser = null; // বর্তমান লগইন করা শিক্ষার্থী
+let currentUser = null;
 let isAdmin = false;
+let currentAuthor = null;
 
 function el(tag, attrs={}, children=[]){
   const d = document.createElement(tag);
@@ -282,14 +298,21 @@ function toFirestoreTimestampFromLocalValue(val){ if(!val) return null; return f
 function hideAllScreens(){ document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden')); document.getElementById('home').classList.remove('hidden'); }
 
 /* -----------------------
-   UI refs (Added Registration/Login/Sidebar)
+   UI refs
    ----------------------- */
 const registerBtn = document.getElementById('registerBtn');
 const loginBtn = document.getElementById('loginBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const adminBtn = document.getElementById('adminBtn');
+const dashboardBtn = document.getElementById('dashboardBtn');
 const homeScreen = document.getElementById('home');
 const examListArea = document.getElementById('examListArea');
+
+const dashboardScreen = document.getElementById('dashboardScreen');
+const viewPersonalInfoBtn = document.getElementById('viewPersonalInfoBtn');
+const viewPreviousExamsBtn = document.getElementById('viewPreviousExamsBtn');
+const personalInfoSection = document.getElementById('personalInfoSection');
+const previousExamsSection = document.getElementById('previousExamsSection');
 
 const registrationScreen = document.getElementById('registrationScreen');
 const regNameInput = document.getElementById('regName');
@@ -303,7 +326,6 @@ const loginMobileInput = document.getElementById('loginMobile');
 const loginPassInput = document.getElementById('loginPass');
 const completeLoginBtn = document.getElementById('completeLoginBtn');
 
-const dashboardSidebar = document.getElementById('dashboardSidebar');
 const infoName = document.getElementById('infoName');
 const infoMobile = document.getElementById('infoMobile');
 const infoDistrict = document.getElementById('infoDistrict');
@@ -311,7 +333,6 @@ const infoPass = document.getElementById('infoPass');
 const togglePassBtn = document.getElementById('togglePassBtn');
 const prevExamsList = document.getElementById('prevExamsList');
 
-// Existing Exam/Result/Admin Refs
 const examScreen = document.getElementById('examScreen');
 const examTitleEl = document.getElementById('examTitle');
 const questionsArea = document.getElementById('questionsArea');
@@ -326,18 +347,40 @@ const downloadCsvBtn = document.getElementById('downloadCsvBtn');
 const backHomeBtn = document.getElementById('backHomeBtn');
 const ratingSection = document.getElementById('ratingSection');
 const adminPanel = document.getElementById('adminPanel');
-const viewStudentsBtn = document.getElementById('viewStudentsBtn'); // NEW
+const viewStudentsBtn = document.getElementById('viewStudentsBtn');
+const studentListArea = document.getElementById('studentListArea');
+const studentsTable = document.getElementById('studentsTable');
+const closeStudentListBtn = document.getElementById('closeStudentListBtn');
+const studentDashboardArea = document.getElementById('studentDashboardArea');
+const studentDashTitle = document.getElementById('studentDashTitle');
+const studentDashInfo = document.getElementById('studentDashInfo');
+const studentDashExams = document.getElementById('studentDashExams');
+const closeStudentDashBtn = document.getElementById('closeStudentDashBtn');
 
-const studentListArea = document.getElementById('studentListArea'); // NEW
-const studentsTable = document.getElementById('studentsTable'); // NEW
-const closeStudentListBtn = document.getElementById('closeStudentListBtn'); // NEW
-const studentDashboardArea = document.getElementById('studentDashboardArea'); // NEW
-const studentDashInfo = document.getElementById('studentDashInfo'); // NEW
-const studentDashExams = document.getElementById('studentDashExams'); // NEW
-const closeStudentDashBtn = document.getElementById('closeStudentDashBtn'); // NEW
+const closeAdmin = document.getElementById('closeAdmin');
+const createPaperBtn = document.getElementById('createPaperBtn');
+const viewPapersBtn = document.getElementById('viewPapersBtn');
+const viewLogBtn = document.getElementById('viewLogBtn');
+const closePastBtn = document.getElementById('closePastBtn');
+const closeLogBtn = document.getElementById('closeLogBtn');
+const addQuestionBtn = document.getElementById('addQuestionBtn');
+const savePaperBtn = document.getElementById('savePaperBtn');
+const cancelCreateBtn = document.getElementById('cancelCreateBtn');
+const paperTitleInput = document.getElementById('paperTitle');
+const paperDurationInput = document.getElementById('paperDuration');
+const paperStartInput = document.getElementById('paperStart');
+const paperEndInput = document.getElementById('paperEnd');
+const paperAuthorInput = document.getElementById('paperAuthor');
+const questionsEditor = document.getElementById('questionsEditor');
+const pastPapersArea = document.getElementById('pastPapersArea');
+const papersList = document.getElementById('papersList');
+const resultsArea = document.getElementById('resultsArea');
+const authorFilter = document.getElementById('authorFilter');
+const authorNameInput = document.getElementById('authorNameInput');
+const authorSuggestions = document.getElementById('authorSuggestions');
+const loginRecords = document.getElementById('loginRecords');
 
 
-// Existing State
 let currentPaperId = null;
 let examQuestions = [];
 let examTimer = null;
@@ -354,8 +397,13 @@ logoutBtn.addEventListener('click', ()=> logoutUser() );
 adminBtn.addEventListener('click', ()=> promptAdminLogin() );
 completeRegBtn.addEventListener('click', ()=> registerUser() );
 completeLoginBtn.addEventListener('click', ()=> loginUser() );
+dashboardBtn.addEventListener('click', ()=> openDashboard() );
 
-// Existing Admin/Exam wires
+// Dashboard Sub-navigation
+viewPersonalInfoBtn.addEventListener('click', ()=> switchDashboardSection('personal') );
+viewPreviousExamsBtn.addEventListener('click', ()=> switchDashboardSection('exams') );
+
+// Existing Exam/Result/Admin wires
 submitExamBtn.addEventListener('click', ()=> { if(confirm('আপনি কি পরীক্ষাটি সাবমিট করতে চান?')) submitExam(); });
 toggleMarksBtn.addEventListener('click', ()=> { showMarks = !showMarks; renderMarksToggle(); });
 downloadCsvBtn.addEventListener('click', ()=> { if(!lastResult) return alert('কোনো ফলাফলের ডেটা নেই'); downloadResultCsv(lastResult); });
@@ -364,33 +412,56 @@ togglePassBtn.addEventListener('click', ()=> {
     if(infoPass.classList.contains('hidden')){ infoPass.classList.remove('hidden'); togglePassBtn.textContent='লুকান'; }
     else { infoPass.classList.add('hidden'); togglePassBtn.textContent='দেখুন'; }
 });
-viewStudentsBtn.addEventListener('click', ()=> renderStudentListAdmin() ); // NEW
+viewStudentsBtn.addEventListener('click', ()=> renderStudentListAdmin() );
 closeStudentListBtn.addEventListener('click', ()=> { studentListArea.classList.add('hidden'); adminPanel.classList.remove('hidden'); });
 closeStudentDashBtn.addEventListener('click', ()=> { studentDashboardArea.classList.add('hidden'); studentListArea.classList.remove('hidden'); });
-
-// Remaining existing wires (simplified)
-const closeAdmin = document.getElementById('closeAdmin');
-const createPaperBtn = document.getElementById('createPaperBtn');
-const viewPapersBtn = document.getElementById('viewPapersBtn');
-const viewLogBtn = document.getElementById('viewLogBtn');
-const closePastBtn = document.getElementById('closePastBtn');
-const closeLogBtn = document.getElementById('closeLogBtn');
-const addQuestionBtn = document.getElementById('addQuestionBtn');
-const savePaperBtn = document.getElementById('savePaperBtn');
-const cancelCreateBtn = document.getElementById('cancelCreateBtn');
 
 closeAdmin.addEventListener('click', ()=> closeAdminPanel() );
 createPaperBtn.addEventListener('click', ()=> openCreatePaper() );
 viewPapersBtn.addEventListener('click', ()=> renderPapersList() );
 viewLogBtn.addEventListener('click', ()=> renderLogs() );
-closePastBtn && closePastBtn.addEventListener('click', ()=> { document.getElementById('pastPapersArea').classList.add('hidden'); adminPanel.classList.remove('hidden'); document.getElementById('resultsArea').innerHTML=''; });
+closePastBtn && closePastBtn.addEventListener('click', ()=> { pastPapersArea.classList.add('hidden'); adminPanel.classList.remove('hidden'); resultsArea.innerHTML=''; });
 closeLogBtn && closeLogBtn.addEventListener('click', ()=> { document.getElementById('logArea').classList.add('hidden'); adminPanel.classList.remove('hidden'); });
 addQuestionBtn.addEventListener('click', ()=> addQuestionEditor() );
 savePaperBtn.addEventListener('click', ()=> saveCurrentPaper() );
 cancelCreateBtn.addEventListener('click', ()=> closeCreatePaper() );
+authorNameInput.addEventListener('input', ()=> populateAuthorSuggestions(authorNameInput.value) );
+authorFilter.addEventListener('change', ()=> renderPapersList() );
+
 
 /* -----------------------
-   1. Registration & Login System
+   Dashboard Navigation
+   ----------------------- */
+function openDashboard(){
+    if(!currentUser) return goHome();
+    hideAllScreens();
+    dashboardScreen.classList.remove('hidden');
+    switchDashboardSection('personal');
+}
+
+function switchDashboardSection(section){
+    viewPersonalInfoBtn.style.background = viewPreviousExamsBtn.style.background = '';
+    personalInfoSection.classList.add('hidden');
+    previousExamsSection.classList.add('hidden');
+
+    if(section === 'personal'){
+        personalInfoSection.classList.remove('hidden');
+        viewPersonalInfoBtn.style.background = 'var(--primary-blue)';
+        infoName.textContent = currentUser.name;
+        infoMobile.textContent = currentUser.id;
+        infoPass.textContent = currentUser.password;
+        infoDistrict.textContent = currentUser.district;
+        togglePassBtn.textContent = 'দেখুন';
+        infoPass.classList.add('hidden');
+    } else if(section === 'exams'){
+        previousExamsSection.classList.remove('hidden');
+        viewPreviousExamsBtn.style.background = 'var(--primary-blue)';
+        renderPreviousExams();
+    }
+}
+
+/* -----------------------
+   Authentication
    ----------------------- */
 async function registerUser(){
     const name = regNameInput.value.trim();
@@ -406,7 +477,6 @@ async function registerUser(){
 
         await docRef.set({ name, password: pass, district, isActive: true, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
         alert('রেজিস্ট্রেশন সফল হয়েছে। এবার লগইন করুন।');
-        // Clear forms and move to login screen
         regNameInput.value = regMobileInput.value = regPassInput.value = regDistrictInput.value = '';
         loginMobileInput.value = mobile;
         hideAllScreens(); loginScreen.classList.remove('hidden');
@@ -428,7 +498,7 @@ async function loginUser(){
 
         if(user.password === pass){
             currentUser = { id: doc.id, ...user };
-            localStorage.setItem('currentUser', JSON.stringify(currentUser)); // Session/Cookies replacement
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
             updateUIForAuth();
             goHome();
         } else alert('ভুল পাসওয়ার্ড।');
@@ -451,38 +521,28 @@ function checkUserSession(){
     updateUIForAuth();
 }
 
-/* -----------------------
-   2. Home UI & Options
-   ----------------------- */
 function updateUIForAuth(){
     const loggedIn = currentUser !== null;
     registerBtn.classList.toggle('hidden', loggedIn);
     loginBtn.classList.toggle('hidden', loggedIn);
     logoutBtn.classList.toggle('hidden', !loggedIn);
-    dashboardSidebar.classList.toggle('hidden', !loggedIn);
-    
-    // Update Dashboard Info & Previous Exams
-    if(loggedIn){
-        infoName.textContent = currentUser.name;
-        infoMobile.textContent = currentUser.id;
-        infoPass.textContent = currentUser.password;
-        infoDistrict.textContent = currentUser.district;
-        togglePassBtn.textContent = 'দেখুন';
-        infoPass.classList.add('hidden');
-        renderPreviousExams();
-    }
-    renderExamList(); // Exam list status depends on login
+    dashboardBtn.classList.toggle('hidden', !loggedIn);
+    renderExamList();
 }
 
+/* -----------------------
+   Exam List (Only the latest one)
+   ----------------------- */
 async function renderExamList(){
     examListArea.innerHTML = '';
     try{
-        const snap = await db.collection(EXAMS_COLLECTION).orderBy('created','desc').get();
+        const snap = await db.collection(EXAMS_COLLECTION).orderBy('created','desc').limit(1).get();
+        
         if(snap.empty){ examListArea.appendChild(el('div',{},['কোনো পরীক্ষা বর্তমানে নেই।'])); return; }
 
         snap.forEach(doc=>{
             const o = doc.data();
-            const examItem = el('div', {class: 'exam-item'});
+            const examItem = el('div', {class: 'card exam-item'});
             
             const titleEl = el('div', {text: o.title, style:'font-weight:700; font-size:16px; color:var(--primary-blue);'});
             const metaEl = el('div', {class: 'small', text:`সময়: ${o.duration} মিনিট | শুরু: ${o.startTime ? fmtDateTime(o.startTime) : '—'} | প্রশ্নকর্তা: ${o.authorName || '—'}`});
@@ -504,7 +564,7 @@ async function renderExamList(){
 }
 
 /* -----------------------
-   Previous Exams (Dashboard)
+   Previous Exams & Result Logic 
    ----------------------- */
 async function renderPreviousExams(){
     prevExamsList.innerHTML = 'লোড হচ্ছে...';
@@ -516,7 +576,6 @@ async function renderPreviousExams(){
         for(const examDoc of allExamsSnap.docs){
             const resultSnap = await db.collection(EXAMS_COLLECTION).doc(examDoc.id).collection('results').where('candidate','==',currentUser.name).orderBy('date','desc').get();
             if(!resultSnap.empty){
-                // Only take the latest result for this exam
                 const latestResult = resultSnap.docs[0].data();
                 results.push({
                     title: examDoc.data().title,
@@ -530,7 +589,6 @@ async function renderPreviousExams(){
         
         if(results.length === 0){ prevExamsList.textContent = 'আপনি এখনো কোনো পরীক্ষায় অংশগ্রহণ করেননি।'; return; }
 
-        // 6. রিপোর্টের পরিবর্তন - স্কোর descending অনুযায়ী তালিকা
         results.sort((a, b) => b.score - a.score);
 
         prevExamsList.innerHTML = '';
@@ -556,11 +614,9 @@ async function loadResultForReview(paperId, resultId){
         const paper = examDoc.data();
         const result = resultDoc.data();
         
-        // Populate global state for rendering
         examQuestions = JSON.parse(JSON.stringify(paper.questions || []));
         lastResult = Object.assign({}, result, {paperId, id: resultId});
 
-        // Hide current screen and show result screen
         goHome();
         homeScreen.classList.add('hidden');
         resultScreen.classList.remove('hidden'); resultScreen.classList.add('show');
@@ -569,154 +625,14 @@ async function loadResultForReview(paperId, resultId){
                                <div>সঠিক: <strong>${result.correct}</strong> — ভুল: <strong>${result.wrong}</strong></div>
                                <div style="margin-top:6px">মোট প্রাপ্ত নম্বর: <strong>${Number(result.total).toFixed(2)}</strong></div>`;
 
-        renderDetailedAnswers(); // Use the existing function
+        renderDetailedAnswers();
         
-        // Hide rating for previous exams
-        ratingSection.classList.add('hidden');
+        document.getElementById('ratingSection').classList.add('hidden');
 
     }catch(e){ console.error(e); alert('ফলাফল দেখতে সমস্যা: '+(e.message||e)); }
 }
 
-/* -----------------------
-   3. Exam Flow & Timer
-   ----------------------- */
-async function beginExamFlow(key, paper){
-    // This function needs to be rewritten to check currentUser instead of candidateNameInput
-    if(!currentUser) return alert('লগইন করুন');
-
-    currentPaperId = key;
-    try{
-        const now = firebase.firestore.Timestamp.fromDate(new Date());
-        if(paper.startTime && now.seconds < paper.startTime.seconds) return alert('এই মডেল টেস্ট এখনও শুরু হয়নি।');
-        if(paper.endTime && now.seconds > paper.endTime.seconds) return alert('এই মডেল টেস্ট শেষ হয়েছে।');
-
-        // Check if student already attempted (if MaxAttempts rule is enforced)
-        const attemptsSnap = await db.collection(EXAMS_COLLECTION).doc(key).collection('results').where('candidate','==',currentUser.name).get();
-        if(EXAM_RULES.maxAttempts > 0 && attemptsSnap.docs.length >= EXAM_RULES.maxAttempts) {
-            return alert(`আপনি এই পরীক্ষাটি ইতিমধ্যে ${EXAM_RULES.maxAttempts} বার দিয়েছেন। আর অংশ নিতে পারবেন না।`);
-        }
-
-        examQuestions = JSON.parse(JSON.stringify(paper.questions || []));
-        examQuestions = examQuestions.map(q => ({ q: q.q, options: q.options, ans: Number(q.ans), point: Number(q.point || 0), negative: (q.negative!==undefined?Number(q.negative):EXAM_RULES.negativePerQuestion) }));
-
-        // Hide all, show exam screen
-        hideAllScreens();
-        examScreen.classList.remove('hidden');
-
-        examTitleEl.textContent = paper.title || 'পরীক্ষা';
-        renderExam(paper.title); // existing function
-
-        const durationSecFromPaper = (paper.duration && Number(paper.duration) > 0) ? Number(paper.duration) * 60 : 0;
-        const defaultDurationSec = (EXAM_RULES.totalTime && Number(EXAM_RULES.totalTime) > 0) ? Number(EXAM_RULES.totalTime) * 60 : 0;
-        
-        // Timer calculation logic is fine, using existing logic
-        let desiredSeconds = durationSecFromPaper || defaultDurationSec || 0;
-        if(paper.endTime){
-            const nowMs = Date.now();
-            const endMs = paper.endTime.toDate().getTime();
-            const maxLeft = Math.floor((endMs - nowMs)/1000);
-            if(maxLeft <= 0) return alert('এই মডেল টেস্ট শেষ হয়েছে।');
-            if(desiredSeconds > 0) timeLeftSeconds = Math.min(desiredSeconds, maxLeft);
-            else timeLeftSeconds = maxLeft;
-        } else { timeLeftSeconds = desiredSeconds; }
-
-        fixedClock.classList.remove('hidden');
-        if(timeLeftSeconds > 0) startTimer(timeLeftSeconds);
-        else fixedTimerDisplay.textContent = '';
-        
-        logoutBtn.style.display = 'none';
-        adminBtn.style.display = 'none';
-
-    }catch(e){ console.error(e); alert('প্রশ্নপত্র লোড করতে সমস্যা: '+e.message); }
-}
-
-function startTimer(seconds){ // Existing function, needs to ensure blinking CSS works
-    clearInterval(examTimer);
-    timeLeftSeconds = seconds;
-    updateTimerDisplay();
-    examTimer = setInterval(()=>{
-        timeLeftSeconds--;
-        updateTimerDisplay();
-        if(timeLeftSeconds <= 0){
-            clearInterval(examTimer);
-            alert('সময় শেষ — পরীক্ষা স্বয়ংক্রিয়ভাবে সাবমিট হচ্ছে।');
-            submitExam();
-        } else if(timeLeftSeconds <= 30){
-            fixedTimerDisplay.classList.add('blinking');
-        }
-    }, 1000);
-}
-
-// Rest of the exam and scoring functions (renderExam, updateTimerDisplay, submitExam, etc.) are mostly fine, but need to use currentUser.name for saving result.
-
-async function submitExam(){
-    clearInterval(examTimer);
-    try{
-        let correct = 0, wrong = 0;
-        let totalScore = 0;
-        const perQuestion = [];
-        const answers = [];
-        examQuestions.forEach((q, idx)=>{
-            const sel = document.querySelector(`input[name="q${idx}"]:checked`);
-            const chosen = sel ? parseInt(sel.value) : null;
-            answers.push(chosen);
-            if(chosen === null){ perQuestion.push(0); }
-            else if(chosen === q.ans){ correct++; totalScore += Number(q.point || 0); perQuestion.push(Number(q.point||0)); }
-            else { wrong++; const neg = (q.negative !== undefined && q.negative !== null) ? Number(q.negative) : (EXAM_RULES.negativeMarking ? EXAM_RULES.negativePerQuestion : 0); totalScore -= neg; perQuestion.push(-neg); }
-        });
-
-        // Use currentUser.name
-        const payload = { candidate: currentUser.name, mobile: currentUser.id, total: totalScore, correct, wrong, perQuestion, answers, date: firebase.firestore.FieldValue.serverTimestamp() };
-        const writeRes = await db.collection(EXAMS_COLLECTION).doc(currentPaperId).collection('results').add(payload);
-
-        // Fetch saved result
-        const resSnap = await db.collection(EXAMS_COLLECTION).doc(currentPaperId).collection('results').doc(writeRes.id).get();
-        if(resSnap.exists){
-            const saved = resSnap.data();
-            saved.date = saved.date ? saved.date.toDate().toISOString() : new Date().toISOString();
-            lastResult = Object.assign({}, saved, {paperId: currentPaperId, id: resSnap.id});
-        }
-
-        clearInterval(examTimer);
-        fixedClock.classList.add('hidden');
-        
-        examScreen.classList.add('hidden');
-        resultScreen.classList.remove('hidden'); 
-
-        // compute rank
-        let rank = null, totalParticipants = 0;
-        try{
-            const allSnap = await db.collection(EXAMS_COLLECTION).doc(currentPaperId).collection('results').get();
-            const arr = allSnap.docs.map(d=>({ id: d.id, total: (d.data().total || 0), date: (d.data().date ? d.data().date.toDate().getTime() : 0), candidate: d.data().candidate }));
-            arr.sort((a,b)=> { if(b.total !== a.total) return b.total - a.total; return a.date - b.date; });
-            totalParticipants = arr.length;
-            if(lastResult && lastResult.id){ rank = arr.findIndex(a=>a.id===lastResult.id) + 1; }
-        }catch(e){ console.error('rank compute error', e); }
-
-        let rankHtml = '';
-        if(rank && totalParticipants){
-            rankHtml = `<div style="font-size:18px;font-weight:800;margin-top:6px">আপনি মোট ${totalParticipants} পরীক্ষার্থীর মধ্যে <span style="font-size:24px;color:var(--primary-blue)">${rank} তম</span> অবস্থানে আছেন</div>`;
-        }
-
-        summaryEl.innerHTML = `<div>সঠিক: <strong>${correct}</strong> — ভুল: <strong>${wrong}</strong></div><div style="margin-top:6px">মোট প্রাপ্ত নম্বর: <strong>${Number(totalScore).toFixed(2)}</strong></div>${rankHtml}`;
-        renderDetailedAnswers();
-
-        const examDoc = await db.collection(EXAMS_COLLECTION).doc(currentPaperId).get();
-        const examMeta = examDoc.exists ? examDoc.data() : null;
-        setTimeout(()=>{ if(examMeta && examMeta.authorName){ renderRatingSection(currentPaperId, examMeta.title || '', examMeta.authorName); } }, 400);
-
-    }catch(e){ console.error(e); alert('সাবমিট করতে সমস্যা: '+e.message); }
-    finally{
-        logoutBtn.style.display = 'block';
-        adminBtn.style.display = 'block';
-        renderPreviousExams(); // Update sidebar immediately
-    }
-}
-
-/* -----------------------
-   4. পূর্ববর্তী পরীক্ষার ফলাফল (Detailed Answers)
-   ----------------------- */
-function renderDetailedAnswers(){ // Modified to use colors
+function renderDetailedAnswers(){
     detailedAnswers.innerHTML = '';
     if(!lastResult) return;
     examQuestions.forEach((q, idx)=>{
@@ -725,7 +641,8 @@ function renderDetailedAnswers(){ // Modified to use colors
         if(score > 0) statusClass = 'correct-ans';
         else if(score < 0) statusClass = 'wrong-ans';
         
-        const userAns = lastResult.answers[idx] === null || lastResult.answers[idx] === undefined ? 'উত্তর নেই' : q.options[lastResult.answers[idx]];
+        const userAnsIndex = lastResult.answers[idx];
+        const userAns = userAnsIndex === null || userAnsIndex === undefined ? 'উত্তর নেই' : q.options[userAnsIndex];
         const correctAns = q.options[q.ans];
 
         const block = el('div',{class:'question'});
@@ -738,233 +655,736 @@ function renderDetailedAnswers(){ // Modified to use colors
     });
     renderMarksToggle();
 }
-function renderMarksToggle(){ // Existing function, fine
+function renderMarksToggle(){
     const markLines = detailedAnswers.querySelectorAll('.mark-line');
     markLines.forEach(elm=>elm.style.display = showMarks ? 'block' : 'none');
     toggleMarksBtn.textContent = showMarks ? 'মার্ক লুকান' : 'মার্কসহ উত্তর দেখুন';
 }
 
 /* -----------------------
-   5. Admin Student Management
+   Exam Flow Functions (FIXED: renderExam added)
    ----------------------- */
-const VIEW_STUDENT_DASH = async (studentId) => {
+
+function renderExam(title){ 
+    questionsArea.innerHTML = '';
+    const questionHtml = examQuestions.map((q,i)=>{
+        const optionsHtml = q.options.map((o,j)=>
+            `<label class="inline"><input type="radio" name="q${i}" value="${j}" />${o}</label>`
+        ).join('');
+        
+        return `<div class="question">
+                    <div>${i+1}. ${q.q}</div>
+                    ${optionsHtml}
+                </div>`;
+    }).join('');
+    questionsArea.innerHTML = questionHtml;
+}
+
+function updateTimerDisplay(){ 
+    const min = Math.floor(timeLeftSeconds / 60); 
+    const sec = timeLeftSeconds % 60;
+    const timeStr = `${min.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+    document.getElementById('timerDisplay').textContent = timeStr;
+    fixedTimerDisplay.textContent = timeStr;
+}
+
+async function beginExamFlow(key, paper){
+    if(!currentUser) return alert('লগইন করুন');
+    currentPaperId = key;
     try{
-        const doc = await db.collection(USERS_COLLECTION).doc(studentId).get();
-        if(!doc.exists) return alert('শিক্ষার্থী পাওয়া যায়নি');
-        const student = doc.data();
+        const now = firebase.firestore.Timestamp.fromDate(new Date());
+        if(paper.startTime && now.seconds < paper.startTime.seconds) return alert('এই মডেল টেস্ট এখনও শুরু হয়নি।');
+        if(paper.endTime && now.seconds > paper.endTime.seconds) return alert('এই মডেল টেস্ট শেষ হয়েছে।');
+        
+        const attemptsSnap = await db.collection(EXAMS_COLLECTION).doc(key).collection('results').where('mobile','==',currentUser.id).get();
+        if(EXAM_RULES.maxAttempts > 0 && attemptsSnap.docs.length >= EXAM_RULES.maxAttempts) { return alert(`আপনি এই পরীক্ষাটি ইতিমধ্যে ${EXAM_RULES.maxAttempts} বার দিয়েছেন। আর অংশ নিতে পারবেন না।`); }
+        
+        examQuestions = JSON.parse(JSON.stringify(paper.questions || [])).map(q => ({ 
+            q: q.q, 
+            options: q.options, 
+            ans: Number(q.ans), 
+            point: Number(q.point || 0), 
+            negative: (q.negative!==undefined?Number(q.negative):EXAM_RULES.negativePerQuestion) 
+        }));
+        
+        hideAllScreens(); 
+        examScreen.classList.remove('hidden');
+        examTitleEl.textContent = paper.title || 'পরীক্ষা'; 
+        
+        renderExam(paper.title);
+        
+        const durationSecFromPaper = (paper.duration && Number(paper.duration) > 0) ? Number(paper.duration) * 60 : 0;
+        const defaultDurationSec = (EXAM_RULES.totalTime && Number(EXAM_RULES.totalTime) > 0) ? Number(EXAM_RULES.totalTime) * 60 : 0;
+        
+        let desiredSeconds = durationSecFromPaper || defaultDurationSec || 0;
 
-        hideAllScreens();
-        studentDashboardArea.classList.remove('hidden');
-        document.getElementById('studentDashTitle').textContent = student.name + ' এর ড্যাশবোর্ড';
+        if(paper.endTime){ 
+            const nowMs = Date.now(); 
+            const endMs = paper.endTime.toDate().getTime(); 
+            const maxLeft = Math.floor((endMs - nowMs)/1000); 
+            if(maxLeft <= 0) return alert('এই মডেল টেস্ট শেষ হয়েছে।'); 
+            
+            if(desiredSeconds > 0) {
+                timeLeftSeconds = Math.min(desiredSeconds, maxLeft); 
+            } else {
+                timeLeftSeconds = maxLeft;
+            }
+        } else { 
+            timeLeftSeconds = desiredSeconds; 
+        }
 
-        // Personal Info
-        const statusText = student.isActive ? 'Active' : 'Inactive';
-        const statusColor = student.isActive ? 'var(--success-green)' : 'var(--danger-red)';
+        fixedClock.classList.remove('hidden');
+        if(timeLeftSeconds > 0) startTimer(timeLeftSeconds); else fixedTimerDisplay.textContent = '';
+        
+        logoutBtn.style.display = 'none'; 
+        adminBtn.style.display = 'none';
+
+    }catch(e){ 
+        console.error(e); 
+        alert('প্রশ্নপত্র লোড করতে সমস্যা: ' + (e.message || e)); 
+    }
+}
+
+function startTimer(seconds){
+    clearInterval(examTimer); 
+    timeLeftSeconds = seconds; 
+    updateTimerDisplay();
+    examTimer = setInterval(()=>{
+        timeLeftSeconds--; 
+        updateTimerDisplay();
+        if(timeLeftSeconds <= 0){ 
+            clearInterval(examTimer); 
+            alert('সময় শেষ — পরীক্ষা স্বয়ংক্রিয়ভাবে সাবমিট হচ্ছে।'); 
+            submitExam(); 
+        }
+        else if(timeLeftSeconds <= 30){ 
+            fixedTimerDisplay.classList.add('blinking'); 
+        }
+    }, 1000);
+}
+
+async function submitExam(){
+    clearInterval(examTimer);
+    try{
+        let correct = 0, wrong = 0, totalScore = 0; 
+        const perQuestion = [], answers = [];
+        
+        examQuestions.forEach((q, idx)=>{
+            const sel = document.querySelector(`input[name="q${idx}"]:checked`);
+            const chosen = sel ? parseInt(sel.value) : null; 
+            answers.push(chosen);
+            
+            const point = Number(q.point || 0);
+            const neg = (q.negative !== undefined && q.negative !== null) ? Number(q.negative) : (EXAM_RULES.negativeMarking ? EXAM_RULES.negativePerQuestion : 0);
+
+            if(chosen === null){ 
+                perQuestion.push(0); 
+            }
+            else if(chosen === q.ans){ 
+                correct++; 
+                totalScore += point; 
+                perQuestion.push(point); 
+            }
+            else { 
+                wrong++; 
+                totalScore -= neg; 
+                perQuestion.push(-neg); 
+            }
+        });
+
+        const payload = { 
+            candidate: currentUser.name, 
+            mobile: currentUser.id, 
+            total: totalScore, 
+            correct, 
+            wrong, 
+            perQuestion, 
+            answers, 
+            date: firebase.firestore.FieldValue.serverTimestamp() 
+        };
+
+        const writeRes = await db.collection(EXAMS_COLLECTION).doc(currentPaperId).collection('results').add(payload);
+        const resSnap = await db.collection(EXAMS_COLLECTION).doc(currentPaperId).collection('results').doc(writeRes.id).get();
+        
+        if(resSnap.exists){ 
+            const saved = resSnap.data(); 
+            saved.date = saved.date ? saved.date.toDate().toISOString() : new Date().toISOString(); 
+            lastResult = Object.assign({}, saved, {paperId: currentPaperId, id: resSnap.id}); 
+        }
+
+        clearInterval(examTimer); 
+        fixedClock.classList.add('hidden'); 
+        examScreen.classList.add('hidden'); 
+        resultScreen.classList.remove('hidden'); 
+        
+        // Rank Calculation
+        let rank = null, totalParticipants = 0;
+        try{
+            const allSnap = await db.collection(EXAMS_COLLECTION).doc(currentPaperId).collection('results').get();
+            const arr = allSnap.docs.map(d=>({ 
+                id: d.id, 
+                total: (d.data().total || 0), 
+                date: (d.data().date ? d.data().date.toDate().getTime() : 0), 
+                candidate: d.data().candidate 
+            }));
+            arr.sort((a,b)=> { 
+                if(b.total !== a.total) return b.total - a.total; 
+                return a.date - b.date; 
+            }); 
+            totalParticipants = arr.length;
+            if(lastResult && lastResult.id){ rank = arr.findIndex(a=>a.id===lastResult.id) + 1; }
+        }catch(e){ console.error('rank compute error', e); }
+
+        let rankHtml = ''; 
+        if(rank && totalParticipants){ 
+            rankHtml = `<div style="font-size:18px;font-weight:800;margin-top:6px">আপনি মোট ${totalParticipants} পরীক্ষার্থীর মধ্যে <span style="font-size:24px;color:var(--primary-blue)">${rank} তম</span> অবস্থানে আছেন</div>`; 
+        }
+
+        summaryEl.innerHTML = `<div>সঠিক: <strong>${correct}</strong> — ভুল: <strong>${wrong}</strong></div><div style="margin-top:6px">মোট প্রাপ্ত নম্বর: <strong>${Number(totalScore).toFixed(2)}</strong></div>${rankHtml}`;
+        
+        renderDetailedAnswers();
+        
+        const examDoc = await db.collection(EXAMS_COLLECTION).doc(currentPaperId).get(); 
+        const examMeta = examDoc.exists ? examDoc.data() : null;
+        
+        setTimeout(()=>{ 
+            if(examMeta && examMeta.authorName){ 
+                renderRatingSection(currentPaperId, examMeta.title || '', examMeta.authorName); 
+            } 
+        }, 400);
+
+    }catch(e){ 
+        console.error(e); 
+        alert('সাবমিট করতে সমস্যা: '+(e.message||e)); 
+    }
+    finally{ 
+        logoutBtn.style.display = 'block'; 
+        adminBtn.style.display = 'block'; 
+        renderPreviousExams(); 
+    }
+}
+
+/* -----------------------
+   Admin Functions (Full implementation to avoid undefined errors)
+   ----------------------- */
+async function getAdminPass(){ try{ const docSnap = await db.collection('meta').doc('admin').get(); if(docSnap.exists){ const data = docSnap.data(); if(data.password) return data.password; if(data.pass) return data.pass; } }catch(e){ console.error(e); } return DEFAULT_PASS; }
+async function recordAdminLogin(type, creatorName){ try{ await db.collection('adminLogs').add({type, creatorName: creatorName || null, time: firebase.firestore.FieldValue.serverTimestamp()}); } catch(e){ console.error('log err', e); } }
+
+async function promptAdminLogin(){
+    const correctPass = await getAdminPass();
+    const pass = prompt('প্রশাসক পাসওয়ার্ড দিন:');
+    if(pass === correctPass){
+        isAdmin = true;
+        await recordAdminLogin('Login', currentAuthor || 'Unknown Admin');
+        openAdminPanel();
+    } else if(pass !== null){
+        alert('পাসওয়ার্ড ভুল।');
+    }
+}
+function openAdminPanel(){ 
+    hideAllScreens(); 
+    adminPanel.classList.remove('hidden'); 
+    document.getElementById('adminContent').innerHTML = '<div class="small">এখানে নির্দিষ্ট অপশন নির্বাচন করুন — নতুন প্রশ্নপত্র, বিগত প্রশ্নপত্র, শিক্ষার্থী তালিকা, লগ</div>'; 
+    authorNameInput.value = currentAuthor || '';
+    populateAuthorSuggestions(currentAuthor || '');
+}
+function closeAdminPanel(){ 
+    isAdmin = false; 
+    currentAuthor = null;
+    adminPanel.classList.add('hidden'); 
+    goHome(); 
+}
+
+function openCreatePaper(){
+    if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
+    if(!currentAuthor) {
+        currentAuthor = authorNameInput.value.trim();
+        if(!currentAuthor) return alert('প্রশ্নপত্র তৈরি করার আগে প্রশ্নকর্তার নাম দিন।');
+    }
+    hideAllScreens();
+    document.getElementById('createPaperArea').classList.remove('hidden');
+    paperTitleInput.value = paperDurationInput.value = '';
+    paperStartInput.value = paperEndInput.value = '';
+    paperAuthorInput.value = currentAuthor;
+    questionsEditor.innerHTML = '';
+    examQuestions = [];
+    addQuestionEditor();
+}
+
+async function renderPapersList(){
+    if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
+    hideAllScreens();
+    pastPapersArea.classList.remove('hidden');
+    papersList.innerHTML = 'লোড হচ্ছে...';
+    
+    const filterAuthor = authorFilter.value;
+    let query = db.collection(EXAMS_COLLECTION).orderBy('created', 'desc');
+    if(filterAuthor && filterAuthor !== 'all') {
+        query = query.where('authorName', '==', filterAuthor);
+    }
+
+    try{
+        const snap = await query.get();
+        const papers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        if(papers.length === 0){ papersList.textContent = 'কোনো প্রশ্নপত্র পাওয়া যায়নি।'; return; }
+        
+        papersList.innerHTML = '';
+        const authorSet = new Set(['all']);
+        
+        papers.forEach(p => {
+            if(p.authorName) authorSet.add(p.authorName);
+
+            const item = el('div', {class:'card', style:'margin-bottom:8px; padding:10px;'}, [
+                el('div', {text: p.title, style:'font-weight:bold'}),
+                el('div', {class:'small', text:`প্রশ্নকর্তা: ${p.authorName || '—'} | প্রশ্ন সংখ্যা: ${p.questions ? p.questions.length : 0} | সময়: ${p.duration} মিনিট`}),
+                el('div', {class:'actions', style:'margin-top:6px;'}, [
+                    el('button', {text:'ফলাফল দেখুন', style:'background:var(--primary-blue); padding:5px 8px; font-size:12px;'}, [], { click: ()=> VIEW_PAPER_RESULTS(p.id, p.title) }),
+                    el('button', {text:'সম্পাদনা', style:'background:var(--warning-orange); padding:5px 8px; font-size:12px;'}, [], { click: ()=> EDIT_PAPER(p.id) }),
+                    el('button', {text:'মুছুন', style:'background:var(--danger-red); padding:5px 8px; font-size:12px;'}, [], { click: ()=> DELETE_PAPER(p.id, p.title) })
+                ])
+            ]);
+            papersList.appendChild(item);
+        });
+
+        // Populate filter dropdown
+        authorFilter.innerHTML = '';
+        authorSet.forEach(author => {
+            authorFilter.appendChild(el('option', { value: author, text: author === 'all' ? 'সকল প্রশ্নকর্তা' : author, selected: author === filterAuthor }));
+        });
+
+    } catch(e){
+        console.error(e);
+        papersList.textContent = 'প্রশ্নপত্র লোড করতে সমস্যা: ' + e.message;
+    }
+}
+
+async function renderLogs(){
+    if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
+    hideAllScreens();
+    document.getElementById('logArea').classList.remove('hidden');
+    loginRecords.innerHTML = 'লোড হচ্ছে...';
+    try{
+        const snap = await db.collection('adminLogs').orderBy('time', 'desc').limit(50).get();
+        if(snap.empty){ loginRecords.textContent = 'কোনো লগ রেকর্ড পাওয়া যায়নি।'; return; }
+
+        const table = el('table', {}, [
+            el('thead', {}, [
+                el('tr', {}, [el('th', {text:'সময়'}), el('th', {text:'প্রকার'}), el('th', {text:'প্রশ্নকর্তা/নাম'})])
+            ]),
+            el('tbody', {}, snap.docs.map(doc => {
+                const data = doc.data();
+                return el('tr', {}, [
+                    el('td', {text: fmtDateTime(data.time)}),
+                    el('td', {text: data.type}),
+                    el('td', {text: data.creatorName || '—'})
+                ]);
+            }))
+        ]);
+        loginRecords.innerHTML = '';
+        loginRecords.appendChild(table);
+
+    }catch(e){
+        console.error(e);
+        loginRecords.textContent = 'লগ রেকর্ড লোড করতে সমস্যা: ' + e.message;
+    }
+}
+
+function addQuestionEditor(q={q:'',options:['','','',''],ans:null,point:1,negative:0.25}){
+    const index = examQuestions.length;
+    examQuestions.push(q);
+    
+    const editor = el('div', {class:'admin-question', 'data-index': index, style:'border:1px solid var(--primary-blue); margin-bottom:15px;'});
+    
+    editor.appendChild(el('h4', {text:`প্রশ্ন ${index+1}`}));
+    
+    // Question Text
+    editor.appendChild(el('label', {text:'প্রশ্ন'}));
+    editor.appendChild(el('textarea', {rows:2, value:q.q}, [], {input: (e)=>{ examQuestions[index].q = e.target.value; }}));
+    
+    // Options
+    q.options.forEach((opt, optIndex) => {
+        const optionRow = el('div', {style:'display:flex; gap:8px; align-items:center; margin-top:6px;'});
+        
+        const radio = el('input', {type:'radio', name:`q_ans_${index}`, value:optIndex, checked: q.ans === optIndex}, [], {change: (e)=>{
+            if(e.target.checked) examQuestions[index].ans = optIndex;
+        }});
+        
+        const input = el('input', {type:'text', placeholder:`অপশন ${optIndex+1}`, value:opt, style:'margin-top:0;'}, [], {input: (e)=>{
+            examQuestions[index].options[optIndex] = e.target.value;
+        }});
+
+        optionRow.appendChild(radio);
+        optionRow.appendChild(input);
+        editor.appendChild(optionRow);
+    });
+
+    // Answer Status
+    editor.appendChild(el('div', {class:'small', text:'সঠিক উত্তর অপশন নির্বাচন করুন।'}));
+
+    // Points and Negative Marking
+    const metaRow = el('div', {style:'display:flex; gap:15px; margin-top:10px;'});
+    
+    metaRow.appendChild(el('div', {style:'width:150px'}, [
+        el('label', {text:'পয়েন্ট'}),
+        el('input', {type:'number', value:q.point, step:'0.1'}, [], {input: (e)=>{ examQuestions[index].point = Number(e.target.value); }})
+    ]));
+    
+    metaRow.appendChild(el('div', {style:'width:150px'}, [
+        el('label', {text:'নেগেটিভ মার্কিং'}),
+        el('input', {type:'number', value:q.negative, step:'0.01'}, [], {input: (e)=>{ examQuestions[index].negative = Number(e.target.value); }})
+    ]));
+
+    editor.appendChild(metaRow);
+
+    // Delete Button
+    editor.appendChild(el('div', {style:'text-align:right; margin-top:10px;'}, [
+        el('button', {text:'মুছুন', style:'background:var(--danger-red); padding:6px 10px;'}, [], {click: ()=>{
+            if(confirm('আপনি কি এই প্রশ্নটি মুছতে চান?')){
+                examQuestions.splice(index, 1);
+                questionsEditor.removeChild(editor);
+                // Re-render to fix indices (simpler approach for small papers)
+                closeCreatePaper(true);
+                openCreatePaper(true);
+            }
+        }})
+    ]));
+
+    questionsEditor.appendChild(editor);
+    // Scroll to the new question
+    editor.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeCreatePaper(isInternal=false){
+    if(!isInternal && !confirm('আপনি কি প্রশ্নপত্র তৈরি করা বাতিল করতে চান?')) return;
+    document.getElementById('createPaperArea').classList.add('hidden');
+    adminPanel.classList.remove('hidden');
+}
+
+async function saveCurrentPaper(){
+    if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
+    const title = paperTitleInput.value.trim();
+    const duration = paperDurationInput.value.trim();
+    const authorName = paperAuthorInput.value.trim() || currentAuthor;
+    const startTime = paperStartInput.value;
+    const endTime = paperEndInput.value;
+
+    if(!title || !duration || examQuestions.length === 0 || !authorName) return alert('শিরোনাম, সময়, প্রশ্নকর্তার নাম এবং কমপক্ষে একটি প্রশ্ন প্রয়োজন।');
+    
+    // Final check for questions
+    const validQuestions = examQuestions.filter(q => 
+        q.q && q.options.filter(o => o.trim()).length >= 2 && q.ans !== null && q.point > 0
+    );
+    
+    if(validQuestions.length !== examQuestions.length){
+        return alert('কিছু প্রশ্নে সমস্যা আছে (যেমন: প্রশ্ন নেই, উত্তর নির্বাচন করা হয়নি, বা পয়েন্ট 0)। দয়া করে সেগুলো সংশোধন করুন বা মুছে দিন।');
+    }
+
+    try{
+        const payload = {
+            title,
+            duration: Number(duration),
+            authorName,
+            questions: validQuestions,
+            created: firebase.firestore.FieldValue.serverTimestamp(),
+            startTime: toFirestoreTimestampFromLocalValue(startTime),
+            endTime: toFirestoreTimestampFromLocalValue(endTime)
+        };
+
+        await db.collection(EXAMS_COLLECTION).add(payload);
+        
+        alert(`"${title}" প্রশ্নপত্রটি সফলভাবে সংরক্ষণ করা হয়েছে।`);
+        await recordAdminLogin('Paper Create', authorName);
+        closeCreatePaper();
+        renderPapersList();
+    }catch(e){
+        console.error(e);
+        alert('সংরক্ষণ ব্যর্থ: ' + e.message);
+    }
+}
+
+async function VIEW_PAPER_RESULTS(paperId, title){
+    resultsArea.innerHTML = 'ফলাফল লোড হচ্ছে...';
+    try{
+        const resultsSnap = await db.collection(EXAMS_COLLECTION).doc(paperId).collection('results').orderBy('total', 'desc').get();
+        if(resultsSnap.empty){ resultsArea.textContent = `"${title}" এর জন্য কোনো ফলাফল নেই।`; return; }
+
+        const results = resultsSnap.docs.map((doc, idx) => ({ rank: idx+1, id: doc.id, ...doc.data() }));
+
+        const table = el('table', {}, [
+            el('thead', {}, [
+                el('tr', {}, [
+                    el('th', {text:'র‍্যাঙ্ক'}), 
+                    el('th', {text:'নাম (মোবাইল)'}), 
+                    el('th', {text:'মোট স্কোর'}), 
+                    el('th', {text:'সঠিক'}),
+                    el('th', {text:'ভুল'}),
+                    el('th', {text:'তারিখ'})
+                ])
+            ]),
+            el('tbody', {}, results.map(r => {
+                return el('tr', {}, [
+                    el('td', {text: r.rank}),
+                    el('td', {text: `${r.candidate} (${r.mobile})`}),
+                    el('td', {text: Number(r.total).toFixed(2)}),
+                    el('td', {text: r.correct}),
+                    el('td', {text: r.wrong}),
+                    el('td', {text: fmtDateTime(r.date)})
+                ]);
+            }))
+        ]);
+
+        resultsArea.innerHTML = `<h4>ফলাফল: ${title}</h4>`;
+        resultsArea.appendChild(table);
+
+    }catch(e){
+        console.error(e);
+        resultsArea.textContent = 'ফলাফল লোড করতে সমস্যা: ' + e.message;
+    }
+}
+
+function DELETE_PAPER(paperId, title){
+    if(!confirm(`আপনি কি নিশ্চিত যে আপনি "${title}" প্রশ্নপত্রটি স্থায়ীভাবে মুছে ফেলতে চান? এর সাথে সব ফলাফলও মুছে যাবে।`)) return;
+    
+    db.collection(EXAMS_COLLECTION).doc(paperId).delete()
+        .then(() => {
+            alert(`"${title}" প্রশ্নপত্রটি মুছে ফেলা হয়েছে।`);
+            renderPapersList();
+        })
+        .catch(error => {
+            console.error("Error removing document: ", error);
+            alert("প্রশ্নপত্র মুছতে সমস্যা হয়েছে: " + error.message);
+        });
+}
+
+function EDIT_PAPER(paperId){
+    alert('সম্পাদনা ফিচারটি এই সংস্করণে যোগ করা হয়নি।'); // Placeholder for future implementation
+}
+
+
+async function renderStudentListAdmin(){
+    if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
+    hideAllScreens();
+    studentListArea.classList.remove('hidden');
+    studentsTable.innerHTML = 'লোড হচ্ছে...';
+    try{
+        const snap = await db.collection(USERS_COLLECTION).orderBy('createdAt', 'desc').get();
+        if(snap.empty){ studentsTable.textContent = 'কোনো শিক্ষার্থী পাওয়া যায়নি।'; return; }
+
+        const students = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        const table = el('table', {}, [
+            el('thead', {}, [
+                el('tr', {}, [el('th', {text:'নাম'}), el('th', {text:'মোবাইল/আইডি'}), el('th', {text:'জেলা'}), el('th', {text:'স্ট্যাটাস'}), el('th', {text:'একশন'})])
+            ]),
+            el('tbody', {}, students.map(s => {
+                const statusBtn = el('button', {text: s.isActive ? 'Active' : 'Blocked', style:`background:${s.isActive ? 'var(--success-green)' : 'var(--danger-red)'}; padding:5px 8px; font-size:12px;`}, [], {click: ()=> TOGGLE_STUDENT_STATUS(s.id, s.isActive) });
+                const viewBtn = el('button', {text:'ড্যাশবোর্ড', style:'background:var(--primary-blue); padding:5px 8px; font-size:12px; margin-left:5px;'}, [], {click: ()=> VIEW_STUDENT_DASH(s.id) });
+                return el('tr', {}, [
+                    el('td', {text: s.name}),
+                    el('td', {text: s.id}),
+                    el('td', {text: s.district || '—'}),
+                    el('td', {}, [statusBtn]),
+                    el('td', {}, [viewBtn])
+                ]);
+            }))
+        ]);
+        studentsTable.innerHTML = '';
+        studentsTable.appendChild(table);
+
+    }catch(e){
+        console.error(e);
+        studentsTable.textContent = 'শিক্ষার্থী তালিকা লোড করতে সমস্যা: ' + e.message;
+    }
+}
+
+async function TOGGLE_STUDENT_STATUS(mobileId, isActive){
+    if(!confirm(`আপনি কি এই অ্যাকাউন্টটি ${isActive ? 'নিষ্ক্রিয়' : 'সক্রিয়'} করতে চান?`)) return;
+    try{
+        await db.collection(USERS_COLLECTION).doc(mobileId).update({ isActive: !isActive });
+        alert(`অ্যাকাউন্ট স্ট্যাটাস সফলভাবে পরিবর্তন করা হয়েছে।`);
+        renderStudentListAdmin(); // Re-render the list
+    }catch(e){
+        console.error(e);
+        alert('স্ট্যাটাস পরিবর্তন ব্যর্থ: ' + e.message);
+    }
+}
+
+async function VIEW_STUDENT_DASH(mobileId){
+    if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
+    studentListArea.classList.add('hidden');
+    studentDashboardArea.classList.remove('hidden');
+    studentDashTitle.textContent = `শিক্ষার্থী ড্যাশবোর্ড (${mobileId})`;
+    studentDashInfo.innerHTML = 'লোড হচ্ছে...';
+    studentDashExams.innerHTML = 'পরীক্ষার ডেটা লোড হচ্ছে...';
+
+    try{
+        const studentDoc = await db.collection(USERS_COLLECTION).doc(mobileId).get();
+        if(!studentDoc.exists) { studentDashInfo.textContent = 'শিক্ষার্থী পাওয়া যায়নি।'; return; }
+        const s = studentDoc.data();
+        
         studentDashInfo.innerHTML = `
-            <p>নাম: <strong>${student.name}</strong></p>
-            <p>মোবাইল/ইউজারনেম: <strong>${studentId}</strong></p>
-            <p>পাসওয়ার্ড: <strong>${student.password}</strong></p>
-            <p>জেলা: <strong>${student.district}</strong></p>
-            <p>স্ট্যাটাস: <strong style="color:${statusColor}">${statusText}</strong></p>
+            <p>নাম: <strong>${s.name}</strong></p>
+            <p>জেলা: <strong>${s.district || '—'}</strong></p>
+            <p>রেজিস্ট্রেশন তারিখ: <strong>${fmtDateTime(s.createdAt)}</strong></p>
+            <p>স্ট্যাটাস: <strong>${s.isActive ? 'সক্রিয়' : 'নিষ্ক্রিয়'}</strong></p>
+            <p>পাসওয়ার্ড: <strong>${s.password}</strong></p>
         `;
 
-        // Active/Inactive & Delete Buttons
-        const statusBtnText = student.isActive ? 'Inactive করুন' : 'Active করুন';
-        const statusBtn = el('button', {text: statusBtnText, style:'background:orange;'});
-        statusBtn.addEventListener('click', async ()=> {
-            if(confirm(`এই শিক্ষার্থীকে ${statusBtnText} করতে চান?`)){
-                await db.collection(USERS_COLLECTION).doc(studentId).update({ isActive: !student.isActive });
-                alert('স্ট্যাটাস আপডেট হয়েছে।');
-                VIEW_STUDENT_DASH(studentId); // Re-render
-            }
-        });
-
-        const deleteBtn = el('button', {text: 'মুছে ফেলুন', style:'background:var(--danger-red);'});
-        deleteBtn.addEventListener('click', async ()=> {
-            if(confirm(`আপনি কি ${student.name} কে স্থায়ীভাবে মুছে ফেলতে চান?`)){
-                await db.collection(USERS_COLLECTION).doc(studentId).delete();
-                alert('শিক্ষার্থী মুছে ফেলা হয়েছে।');
-                studentDashboardArea.classList.add('hidden');
-                renderStudentListAdmin(); // Back to list
-            }
-        });
-        
-        studentDashInfo.appendChild(el('div', {class:'actions', style:'margin-top:12px'}, [statusBtn, deleteBtn]));
-
-        // Exam Info
-        studentDashExams.innerHTML = 'লোড হচ্ছে...';
+        // Load exam results for this student
         const allExamsSnap = await db.collection(EXAMS_COLLECTION).get();
         const results = [];
+
         for(const examDoc of allExamsSnap.docs){
-            const resultSnap = await db.collection(EXAMS_COLLECTION).doc(examDoc.id).collection('results').where('mobile','==',studentId).orderBy('date','desc').get();
+            const resultSnap = await db.collection(EXAMS_COLLECTION).doc(examDoc.id).collection('results').where('mobile','==',mobileId).orderBy('date','desc').get();
             if(!resultSnap.empty){
-                // Show all attempts
-                resultSnap.docs.forEach(resDoc => {
-                    const result = resDoc.data();
+                resultSnap.docs.forEach(doc => {
+                    const r = doc.data();
                     results.push({
-                        title: examDoc.data().title,
-                        score: result.total,
-                        date: fmtDateTime(result.date),
-                        paperId: examDoc.id,
-                        resultId: resDoc.id
+                        examTitle: examDoc.data().title,
+                        score: r.total,
+                        correct: r.correct,
+                        wrong: r.wrong,
+                        date: fmtDateTime(r.date)
                     });
                 });
             }
         }
-        
-        if(results.length === 0){ studentDashExams.textContent = 'কোনো পরীক্ষায় অংশ নেয়নি।'; return; }
-        
-        results.sort((a, b) => b.score - a.score);
 
-        const table = el('table'); const thead = el('thead'); const headerRow = el('tr');
-        ['#','Exam','Score','Date','Action'].forEach(h=> headerRow.appendChild(el('th',{},[h])));
-        thead.appendChild(headerRow); table.appendChild(thead);
-        const tbody = el('tbody');
-        results.forEach((res, idx)=>{
-            const tr = el('tr');
-            tr.appendChild(el('td',{},[String(idx+1)]));
-            tr.appendChild(el('td',{},[res.title]));
-            tr.appendChild(el('td',{},[Number(res.score).toFixed(2)]));
-            tr.appendChild(el('td',{},[res.date]));
-            const viewBtn = el('button', {text:'Answer', style:'padding:4px 8px; font-size:12px;'});
-            viewBtn.addEventListener('click', ()=> loadResultForReview(res.paperId, res.resultId) );
-            tr.appendChild(el('td',{},[viewBtn]));
-            tbody.appendChild(tr);
-        });
-        table.appendChild(tbody); studentDashExams.innerHTML = ''; studentDashExams.appendChild(table);
+        if(results.length === 0){ studentDashExams.textContent = 'এই শিক্ষার্থী কোনো পরীক্ষায় অংশগ্রহণ করেনি।'; return; }
 
+        const table = el('table', {}, [
+            el('thead', {}, [
+                el('tr', {}, [el('th', {text:'পরীক্ষা'}), el('th', {text:'স্কোর'}), el('th', {text:'সঠিক'}), el('th', {text:'ভুল'}), el('th', {text:'তারিখ'})])
+            ]),
+            el('tbody', {}, results.map(r => {
+                return el('tr', {}, [
+                    el('td', {text: r.examTitle}),
+                    el('td', {text: Number(r.score).toFixed(2)}),
+                    el('td', {text: r.correct}),
+                    el('td', {text: r.wrong}),
+                    el('td', {text: r.date})
+                ]);
+            }))
+        ]);
+        studentDashExams.innerHTML = '';
+        studentDashExams.appendChild(table);
 
-    }catch(e){ console.error(e); alert('ড্যাশবোর্ড লোড করতে সমস্যা: '+(e.message||e)); }
-};
-
-async function renderStudentListAdmin(){
-    adminPanel.classList.add('hidden');
-    studentListArea.classList.remove('hidden');
-    studentsTable.innerHTML = 'লোড হচ্ছে...';
-    try{
-        const snap = await db.collection(USERS_COLLECTION).get();
-        if(snap.empty){ studentsTable.innerHTML = 'কোনো নিবন্ধিত শিক্ষার্থী নেই।'; return; }
-
-        const students = snap.docs.map(doc=>({ id: doc.id, ...doc.data() }));
-        
-        const table = el('table'); const thead = el('thead'); const headerRow = el('tr');
-        ['#','Name','Mobile','District','Status','Action'].forEach(h=> headerRow.appendChild(el('th',{},[h])));
-        thead.appendChild(headerRow); table.appendChild(thead);
-        const tbody = el('tbody');
-        students.forEach((student, idx)=>{
-            const tr = el('tr');
-            const statusText = student.isActive ? 'Active' : 'Inactive';
-            const statusColor = student.isActive ? 'var(--success-green)' : 'var(--danger-red)';
-            
-            tr.appendChild(el('td',{},[String(idx+1)]));
-            tr.appendChild(el('td',{},[student.name]));
-            tr.appendChild(el('td',{},[student.id]));
-            tr.appendChild(el('td',{},[student.district]));
-            tr.appendChild(el('td',{},[el('strong', {text:statusText, style:`color:${statusColor}`})]));
-            
-            const dashBtn = el('button', {text:'Dashboard', style:'padding:5px 8px; font-size:12px;'});
-            dashBtn.addEventListener('click', ()=> VIEW_STUDENT_DASH(student.id) );
-            tr.appendChild(el('td',{},[dashBtn]));
-            tbody.appendChild(tr);
-        });
-        table.appendChild(tbody); studentsTable.innerHTML = ''; studentsTable.appendChild(table);
-
-    }catch(e){ console.error(e); studentsTable.innerHTML = 'শিক্ষার্থী তালিকা লোড করতে সমস্যা।'; }
+    }catch(e){
+        console.error(e);
+        studentDashInfo.textContent = 'ডেটা লোড করতে সমস্যা: ' + e.message;
+    }
 }
+
+async function populateAuthorSuggestions(input){
+    authorSuggestions.innerHTML = '';
+    const name = input.trim();
+    if(name.length < 2) return;
+
+    try{
+        const snap = await db.collection(EXAMS_COLLECTION).where('authorName', '>=', name).where('authorName', '<=', name + '\uf8ff').get();
+        const uniqueAuthors = new Set();
+        snap.forEach(doc => {
+            const author = doc.data().authorName;
+            if(author) uniqueAuthors.add(author);
+        });
+
+        uniqueAuthors.forEach(author => {
+            const li = el('li', {text: author, style:'padding:5px 10px; cursor:pointer; border-bottom:1px solid #f0f0f0;'}, [], {click: ()=>{
+                authorNameInput.value = author;
+                currentAuthor = author;
+                authorSuggestions.innerHTML = '';
+                authorNameInput.focus();
+            }});
+            authorSuggestions.appendChild(li);
+        });
+    }catch(e){
+        console.error(e);
+    }
+}
+
+function downloadResultCsv(result){
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM for Bengali/UTF-8 support
+    
+    // 1. Header Row
+    const headers = ["পরীক্ষার নাম", "শিক্ষার্থীর নাম", "মোবাইল আইডি", "মোট স্কোর", "সঠিক উত্তর", "ভুল উত্তর", "তারিখ"];
+    csvContent += headers.join(",") + "\n";
+
+    // 2. Summary Row
+    const summaryRow = [
+        lastResult.paperId, // Assuming paperId is title, replace later if actual title is available
+        lastResult.candidate,
+        lastResult.mobile,
+        Number(lastResult.total).toFixed(2),
+        lastResult.correct,
+        lastResult.wrong,
+        fmtDateTime(lastResult.date)
+    ];
+    csvContent += summaryRow.join(",") + "\n\n";
+
+    // 3. Question Detail Header
+    const detailHeaders = ["প্রশ্ন সংখ্যা", "প্রশ্ন", "সঠিক উত্তর", "আপনার উত্তর", "প্রাপ্ত নম্বর"];
+    csvContent += detailHeaders.join(",") + "\n";
+
+    // 4. Detailed Answers
+    examQuestions.forEach((q, idx) => {
+        const userAnsIndex = lastResult.answers[idx];
+        const userAns = userAnsIndex === null || userAnsIndex === undefined ? 'উত্তর দেয়নি' : q.options[userAnsIndex];
+        const correctAns = q.options[q.ans];
+        const score = lastResult.perQuestion[idx];
+
+        const row = [
+            idx + 1,
+            `"${q.q.replace(/"/g, '""')}"`, // Quote question and escape inner quotes
+            `"${correctAns.replace(/"/g, '""')}"`,
+            `"${userAns.replace(/"/g, '""')}"`,
+            Number(score).toFixed(2)
+        ];
+        csvContent += row.join(",") + "\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Result_${lastResult.candidate}_${lastResult.mobile}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function renderRatingSection(){
+    // Placeholder - rating not fully implemented in DB, so keeping this minimal
+    ratingSection.classList.add('hidden');
+}
+
 
 /* -----------------------
    General Navigation / Reset
    ----------------------- */
 function goHome(){
     clearInterval(examTimer);
-    fixedTimerDisplay.textContent='';
-    fixedClock.classList.add('hidden');
-    // Hide all screens explicitly
+    document.getElementById('fixedTimerDisplay').textContent='';
+    document.getElementById('examClockFixed').classList.add('hidden');
+    
     document.querySelectorAll('.card').forEach(c=>c.classList.add('hidden'));
     
-    // Show only the home screen
     homeScreen.classList.remove('hidden');
     
-    // Reset admin/exam buttons if they were hidden during exam
     logoutBtn.style.display = currentUser ? 'block' : 'none';
     adminBtn.style.display = 'block';
 
-    // Update UI state
     updateUIForAuth();
-}
-
-/* -----------------------
-   Admin Auth & Existing Admin Functions (Simplified/Adapted)
-   ----------------------- */
-async function promptAdminLogin(){
-  const pw = prompt('প্রশাসক পাসওয়ার্ড লিখুন:'); if(pw===null) return;
-  try{
-    const real = await getAdminPass();
-    if((pw+'').trim() === (real+'').trim()){
-      const creator = prompt('আপনার (প্রশ্নকর্তার) নাম লিখুন:');
-      if(creator===null) return;
-      document.getElementById('authorNameInput').value = creator;
-      isAdmin = true;
-      openAdminPanel();
-      await recordAdminLogin('login', creator);
-    } else alert('পাসওয়ার্ড মিলেনি।');
-  }catch(e){ console.error('promptAdminLogin error:', e); alert('লগইন করতে সমস্যা: '+(e.message||e)); }
-}
-
-function openAdminPanel(){
-  hideAllScreens();
-  adminPanel.classList.remove('hidden');
-  document.getElementById('adminContent').innerHTML = '<div class="small">এখানে নির্দিষ্ট অপশন নির্বাচন করুন — নতুন প্রশ্নপত্র, বিগত প্রশ্নপত্র, শিক্ষার্থী তালিকা, লগ</div>';
-  // populateAuthorSuggestions(); // Assuming this is also implemented below
-}
-function closeAdminPanel(){
-  isAdmin = false;
-  adminPanel.classList.add('hidden');
-  goHome(); // Go back to student view
-}
-
-// ... (Existing functions: getAdminPass, recordAdminLogin, populateAuthorSuggestions, openCreatePaper, closeCreatePaper, addQuestionEditor, renderQuestionsEditor, saveCurrentPaper, renderPapersList, loadPaperForAdmin, copyExamLink, makeExamPdf, renderLogs are assumed to be present or adapted from the original second part of the code.)
-
-// ADAPTED existing functions
-async function getAdminPass(){
-  try{
-    const docSnap = await db.collection('meta').doc('admin').get();
-    if(docSnap.exists){ const data = docSnap.data(); if(data.password) return data.password; if(data.pass) return data.pass; }
-  }catch(e){ console.error(e); }
-  return DEFAULT_PASS;
-}
-async function recordAdminLogin(type, creatorName){
-  try{ await db.collection('adminLogs').add({type, creatorName: creatorName || null, time: firebase.firestore.FieldValue.serverTimestamp()}); }
-  catch(e){ console.error('log err', e); }
-}
-async function populateAuthorSuggestions(){
-  const authorSuggestions = document.getElementById('authorSuggestions');
-  authorSuggestions.innerHTML = '';
-  try{
-    const snap = await db.collection('authors').orderBy('lastModified','desc').get();
-    snap.forEach(doc=>{
-      const name = doc.id;
-      const li = el('li',{},[name]); li.style.padding='8px'; li.style.cursor='pointer';
-      li.addEventListener('click', ()=>{ document.getElementById('authorNameInput').value = name; });
-      authorSuggestions.appendChild(li);
-    });
-  }catch(e){ console.error(e); }
 }
 
 /* -----------------------
    Page load handling
    ----------------------- */
 window.addEventListener('load', ()=>{ 
-    checkUserSession(); // Check for existing session
-    renderExamList(); // Load initial exam list
+    checkUserSession();
+    renderExamList();
 });
 
 </script>
 </body>
-</html>window.location.search); const examParam = params.get('exam'); await populateExamSelect(); await populateAuthorSuggestions(); if(examParam){ const option = Array.from(examSelect.options).find(o=>o.value===examParam); if(option){ showNameScreen(); examSelect.value = examParam; showExamTimes(examParam); } } } window.addEventListener('load', ()=>{ handleQueryParam().catch(e=>console.error(e)); });
-
-/* ----------------------- Navigation helpers ----------------------- */ function showNameScreen(){ document.getElementById('home').classList.add('hidden'); populateExamSelect(); nameScreen.classList.remove('hidden'); } function hideNameShowHome(){ nameScreen.classList.add('hidden'); document.getElementById('home').classList.remove('hidden'); } function goHome(){ clearInterval(examTimer); fixedTimerDisplay.textContent=''; resultScreen.classList.add('hidden'); examScreen.classList.add('hidden'); nameScreen.classList.add('hidden'); createPaperArea.classList.add('hidden'); pastPapersArea.classList.add('hidden'); resultsArea.innerHTML=''; logArea.classList.add('hidden'); adminPanel.classList.add('hidden'); document.getElementById('home').classList.remove('hidden'); }
-
-/* ----------------------- Expose helpers (debug) ----------------------- */ window._tw = { makeExamPdf, populateExamSelect, populateAuthorSuggestions }; </script></body>
-
-</html>>
+</html>y>
+</html>
