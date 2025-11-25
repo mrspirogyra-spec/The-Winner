@@ -60,27 +60,27 @@
     .wrong-ans { color: var(--danger-red); font-weight: 700; }
     .no-ans { color: var(--text-gray); }
     
-    /* 4. Administration button smaller size (more) */
+    /* 5. Administration button smaller size */
     #adminBtn {
         padding: 5px 10px; 
         font-size: 13px; 
     }
 
-    /* 5. Footer Action Container Positioning (Raised up slightly) */
+    /* 6. Footer Action Container Positioning (Raised up slightly) */
     .footer-actions-container {
       max-width: 980px; 
-      margin: 0 auto 10px auto; /* Added margin-bottom to raise it */
+      margin: 0 auto 10px auto; 
       padding: 16px; 
       text-align: center;
       display: flex;
       justify-content: center;
       gap: 15px;
-      padding-bottom: 5px; /* Reduced padding-bottom */
+      padding-bottom: 5px; 
     }
 
     footer{margin-top:18px;text-align:center;font-size:13px;color:var(--text-color);padding:16px 0; background:var(--footer-bg); border-top:1px solid #ddd;}
     
-    /* Removing the extraneous 'y>' text */
+    /* 1. FIX: Removing the extraneous 'y>' text */
     body::after { content: none; }
     
     /* Smaller Start/End Time boxes */
@@ -121,6 +121,12 @@
     <div id="home" class="card">
       <h2>বর্তমান / আসন্ন পরীক্ষা</h2>
       <div id="examListArea"></div> 
+    </div>
+    
+    <div class="footer-actions-container" id="homeActionContainer">
+        <button id="registerBtn" style="background:var(--success-green);">Registration</button>
+        <button id="loginBtn" style="background:var(--primary-blue);">Log In</button>
+        <button id="logoutBtn" class="hidden" style="background:var(--danger-red);">Logout</button>
     </div>
     
     <div id="dashboardScreen" class="card hidden">
@@ -222,7 +228,7 @@
     </div>
 
     <div id="createPaperArea" class="card hidden">
-      <h3>নতুন প্রশ্নপত্র</h3>
+      <h3>নতুন প্রশ্নপত্র / সম্পাদনা</h3>
       <div style="display:flex;gap:8px">
         <div style="flex:1">
           <label>শিরোনাম</label>
@@ -259,16 +265,12 @@
       <div style="margin-top:12px" class="actions">
         <button id="addQuestionBtn">প্রশ্ন যোগ করুন</button>
         <button id="savePaperBtn">সংরক্ষণ করুন</button> 
-        <button id="cancelCreateBtn">Back</button>
+        <button id="cancelCreateBtn">Back</button> 
       </div>
     </div>
 
     <div id="pastPapersArea" class="card hidden">
       <h3>বিগত প্রশ্নপত্র</h3>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
-        <select id="authorFilter"></select>
-        <div id="authorsList" style="flex:1"></div>
-      </div>
       <div id="papersList"></div>
       <hr/>
       <div id="resultsArea"></div>
@@ -298,11 +300,6 @@
   </div>
 </div>
 
-<div class="footer-actions-container">
-    <button id="registerBtn" style="background:var(--success-green);">Registration</button>
-    <button id="loginBtn" style="background:var(--primary-blue);">Log In</button>
-    <button id="logoutBtn" class="hidden" style="background:var(--danger-red);">Logout</button>
-</div>
 
 <footer>
   <div>Developed by Subroto Howlader</div>
@@ -341,11 +338,14 @@ let currentUser = null;
 let isAdmin = false;
 let currentAuthor = null;
 let currentPaperId = null; // Used for editing/updating
-let examQuestions = [];
+let examQuestions = []; // Master array for question editor data
 let examTimer = null;
 let timeLeftSeconds = 0;
 let lastResult = null;
 let showMarks = false;
+
+// 4. State variable to hold the original questions when editing starts
+let originalQuestionsSnapshot = []; 
 
 function el(tag, attrs={}, children=[], events={}){
   const d = document.createElement(tag);
@@ -370,6 +370,7 @@ function goHome(){
 
     // Show/hide exam list on home
     examListArea.classList.toggle('hidden', document.getElementById('home').classList.contains('hidden'));
+    document.getElementById('homeActionContainer').classList.remove('hidden');
     updateUIForAuth(); // Re-render exam list
 }
 /* -----------------------
@@ -417,8 +418,8 @@ const defaultNegativeInput = document.getElementById('defaultNegative');
 /* -----------------------
    1. Event wiring & Navigation
    ----------------------- */
-registerBtn.addEventListener('click', ()=> { hideAllScreens(); registrationScreen.classList.remove('hidden'); });
-loginBtn.addEventListener('click', ()=> { hideAllScreens(); loginScreen.classList.remove('hidden'); });
+registerBtn.addEventListener('click', ()=> { hideAllScreens(); registrationScreen.classList.remove('hidden'); document.getElementById('homeActionContainer').classList.add('hidden'); });
+loginBtn.addEventListener('click', ()=> { hideAllScreens(); loginScreen.classList.remove('hidden'); document.getElementById('homeActionContainer').classList.add('hidden'); });
 logoutBtn.addEventListener('click', ()=> logoutUser() );
 adminBtn.addEventListener('click', ()=> promptAdminLogin() );
 
@@ -454,10 +455,10 @@ document.getElementById('closePastBtn').addEventListener('click', ()=> {
 document.getElementById('closeLogBtn').addEventListener('click', ()=> { document.getElementById('logArea').classList.add('hidden'); adminPanel.classList.remove('hidden'); });
 document.getElementById('addQuestionBtn').addEventListener('click', ()=> addQuestionEditor() );
 document.getElementById('savePaperBtn').addEventListener('click', ()=> saveCurrentPaper(false) );
-document.getElementById('cancelCreateBtn').addEventListener('click', ()=> saveCurrentPaper(true) ); 
+// 4. Back button now calls a function that does NOT save
+document.getElementById('cancelCreateBtn').addEventListener('click', ()=> cancelPaperEdit() ); 
 
 document.getElementById('authorNameInput').addEventListener('input', (e)=> populateAuthorSuggestions(e.target.value) );
-document.getElementById('authorFilter').addEventListener('change', ()=> renderPapersList() );
 
 
 /* -----------------------
@@ -477,24 +478,24 @@ function updateUIForAuth(){
 }
 
 /* -----------------------
-   Exam List (Only the latest one)
+   3. Exam List (Only the latest one)
    ----------------------- */
 async function renderExamList(){
     examListArea.innerHTML = '';
     try{
-        // Load only the latest created exam
+        // 3. FIX: Load only the latest created exam
         const snap = await db.collection(EXAMS_COLLECTION).orderBy('created','desc').limit(1).get();
         
         if(snap.empty){ examListArea.appendChild(el('div',{},['কোনো পরীক্ষা বর্তমানে নেই।'])); return; }
 
         snap.forEach(doc=>{
             const o = doc.data();
-            // 1. FIX: Ensure exam is not a draft to be shown on homepage
+            // Ensure exam is not a draft to be shown on homepage
             if(o.isDraft) return;
 
             const examItem = el('div', {class: 'card exam-item'});
             
-            const titleEl = el('div', {text: o.title, style:'font-weight:700; font-size:16px; color:var(--primary-blue);'});
+            const titleEl = el('div', {text: o.title || 'শিরোনাম নেই', style:'font-weight:700; font-size:16px; color:var(--primary-blue);'});
             const metaEl = el('div', {class: 'small', text:`সময়: ${o.duration} মিনিট | শুরু: ${o.startTime ? fmtDateTime(o.startTime) : '—'} | প্রশ্নকর্তা: ${o.authorName || '—'}`});
             
             const startBtn = el('button', {text:'পরীক্ষা শুরু করুন', style:'background:var(--success-green);'});
@@ -576,11 +577,12 @@ function checkUserSession(){
 }
 
 /* -----------------------
-   3. Dashboard and Previous Exams (FIXED)
+   Dashboard and Previous Exams (Kept same)
    ----------------------- */
 function openDashboard(){
     if(!currentUser) return goHome();
     hideAllScreens();
+    document.getElementById('homeActionContainer').classList.add('hidden');
     dashboardScreen.classList.remove('hidden');
     switchDashboardSection('personal');
 }
@@ -606,7 +608,6 @@ function switchDashboardSection(section){
     }
 }
 
-// 3. FIX: Corrected logic for loading previous exams
 async function renderPreviousExams(){
     prevExamsList.innerHTML = 'লোড হচ্ছে...';
     if(!currentUser) return;
@@ -615,11 +616,9 @@ async function renderPreviousExams(){
         const results = [];
 
         for(const examDoc of allExamsSnap.docs){
-            // FIX: Ensure the subcollection query is correctly structured
             // Querying a subcollection's results for the current user's mobile number
             const resultSnap = await db.collection(EXAMS_COLLECTION).doc(examDoc.id).collection('results')
                                        .where('mobile','==',currentUser.id)
-                                       // .orderBy('date','desc') // Removing this as it might cause composite index issues, querying for one user is fast enough
                                        .limit(1) // Get only one result per exam
                                        .get();
             
@@ -669,6 +668,7 @@ async function loadResultForReview(paperId, resultId){
 
         goHome();
         homeScreen.classList.add('hidden');
+        document.getElementById('homeActionContainer').classList.add('hidden');
         resultScreen.classList.remove('hidden'); resultScreen.classList.add('show');
         
         document.getElementById('summary').innerHTML = `<div>শিক্ষার্থী: <strong>${result.candidate}</strong> | তারিখ: <strong>${fmtDateTime(result.date)}</strong></div>
@@ -758,6 +758,7 @@ async function beginExamFlow(key, paper){
         }));
         
         hideAllScreens(); 
+        document.getElementById('homeActionContainer').classList.add('hidden');
         examScreen.classList.remove('hidden');
         examTitleEl.textContent = paper.title || 'পরীক্ষা'; 
         
@@ -927,6 +928,7 @@ async function promptAdminLogin(){
 }
 function openAdminPanel(){ 
     hideAllScreens(); 
+    document.getElementById('homeActionContainer').classList.add('hidden');
     adminPanel.classList.remove('hidden'); 
     document.getElementById('adminContent').innerHTML = '<div class="small">এখানে নির্দিষ্ট অপশন নির্বাচন করুন — নতুন প্রশ্নপত্র, বিগত প্রশ্নপত্র, শিক্ষার্থী তালিকা, লগ</div>'; 
     document.getElementById('authorNameInput').value = currentAuthor || '';
@@ -955,22 +957,28 @@ function openCreatePaper(){
     examQuestions = [];
     currentPaperId = null; // Important: Clear ID for new paper
     defaultNegativeInput.value = '0.50'; 
+    defaultPointInput.value = '1';
+    originalQuestionsSnapshot = []; // Reset snapshot
     addQuestionEditor();
 }
 
 function addQuestionEditor(q={q:'',options:['','','',''],ans:null,point:Number(defaultPointInput.value),negative:Number(defaultNegativeInput.value)}){
     const index = examQuestions.length;
+    q.options = q.options.concat(['','','','']).slice(0, 4); // Ensure exactly 4 options
+    
     examQuestions.push(q);
     
-    const editor = el('div', {class:'admin-question', 'data-index': index, style:'border:1px solid var(--primary-blue); margin-bottom:15px;'}, [], {
-        change: () => updateQuestionData(index) 
-    });
+    // Ensure numeric properties are stored as numbers
+    q.point = Number(q.point);
+    q.negative = Number(q.negative);
+
+    const editor = el('div', {class:'admin-question', 'data-index': index, style:'border:1px solid var(--primary-blue); margin-bottom:15px;'});
     
     editor.appendChild(el('h4', {text:`প্রশ্ন ${index+1}`}));
     
     // Question Text
     editor.appendChild(el('label', {text:'প্রশ্ন'}));
-    editor.appendChild(el('textarea', {rows:2, value:q.q, 'data-prop':'q'}, [], {input: (e)=>{ examQuestions[index].q = e.target.value; }}));
+    editor.appendChild(el('textarea', {rows:2, value:q.q, 'data-prop':'q'}, [], {input: (e)=>{ examQuestions[index].q = e.target.value; updateQuestionData(index); }}));
     
     // Options
     q.options.forEach((opt, optIndex) => {
@@ -978,10 +986,12 @@ function addQuestionEditor(q={q:'',options:['','','',''],ans:null,point:Number(d
         
         const radio = el('input', {type:'radio', name:`q_ans_${index}`, value:optIndex, checked: q.ans === optIndex, 'data-prop':'ans'}, [], {change: (e)=>{
             if(e.target.checked) examQuestions[index].ans = optIndex;
+            updateQuestionData(index);
         }});
         
         const input = el('input', {type:'text', placeholder:`অপশন ${optIndex+1}`, value:opt, style:'margin-top:0;', 'data-opt-index':optIndex}, [], {input: (e)=>{
             examQuestions[index].options[optIndex] = e.target.value;
+            updateQuestionData(index);
         }});
 
         optionRow.appendChild(radio);
@@ -996,12 +1006,12 @@ function addQuestionEditor(q={q:'',options:['','','',''],ans:null,point:Number(d
     
     metaRow.appendChild(el('div', {style:'width:150px'}, [
         el('label', {text:'পয়েন্ট'}),
-        el('input', {type:'number', value:q.point, step:'0.1', 'data-prop':'point'}, [], {input: (e)=>{ examQuestions[index].point = Number(e.target.value); }})
+        el('input', {type:'number', value:q.point, step:'0.1', 'data-prop':'point'}, [], {input: (e)=>{ examQuestions[index].point = Number(e.target.value); updateQuestionData(index); }})
     ]));
     
     metaRow.appendChild(el('div', {style:'width:150px'}, [
         el('label', {text:'নেগেটিভ মার্কিং'}),
-        el('input', {type:'number', value:q.negative, step:'0.01', 'data-prop':'negative'}, [], {input: (e)=>{ examQuestions[index].negative = Number(e.target.value); }})
+        el('input', {type:'number', value:q.negative, step:'0.01', 'data-prop':'negative'}, [], {input: (e)=>{ examQuestions[index].negative = Number(e.target.value); updateQuestionData(index); }})
     ]));
 
     editor.appendChild(metaRow);
@@ -1014,9 +1024,8 @@ function addQuestionEditor(q={q:'',options:['','','',''],ans:null,point:Number(d
                 examQuestions = examQuestions.filter((_, i) => i !== index);
                 // Re-render the entire editor to reset all data-index and input names
                 questionsEditor.innerHTML = '';
-                // Use a temporary array to hold current questions and re-add them one by one
                 const tempQuestions = JSON.parse(JSON.stringify(examQuestions));
-                examQuestions = []; // Clear current list before re-adding
+                examQuestions = []; 
                 tempQuestions.forEach(q => addQuestionEditor(q));
             }
         }})
@@ -1026,7 +1035,7 @@ function addQuestionEditor(q={q:'',options:['','','',''],ans:null,point:Number(d
     editor.scrollIntoView({ behavior: 'smooth' });
 }
 
-// Helper to keep data in sync (essential for EDIT_PAPER fix)
+// Helper to keep data in sync 
 function updateQuestionData(index){
     const editor = document.querySelector(`.admin-question[data-index="${index}"]`);
     if(!editor) return;
@@ -1038,9 +1047,7 @@ function updateQuestionData(index){
             examQuestions[index][prop] = Number(input.value);
         } else if(prop === 'q'){
             examQuestions[index][prop] = input.value;
-        } else if(prop === 'ans' && input.checked){
-             examQuestions[index][prop] = Number(input.value);
-        }
+        } 
     });
 
     // Update options
@@ -1048,10 +1055,14 @@ function updateQuestionData(index){
         const optIndex = Number(input.getAttribute('data-opt-index'));
         examQuestions[index].options[optIndex] = input.value;
     });
+
+    // Update answer selection
+    const selectedAns = editor.querySelector(`input[name="q_ans_${index}"]:checked`);
+    examQuestions[index].ans = selectedAns ? Number(selectedAns.value) : null;
 }
 
 
-// 2. FIX: Save button functionality (Updated to use currentPaperId for UPDATE)
+// Save button functionality (Updated to use currentPaperId for UPDATE)
 async function saveCurrentPaper(isDraft){
     if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
     
@@ -1063,7 +1074,6 @@ async function saveCurrentPaper(isDraft){
     
     // Ensure the array reflects the latest UI changes before validation/saving
     document.querySelectorAll('.admin-question').forEach((_, index) => updateQuestionData(index));
-
 
     // Validation and cleanup
     const validQuestions = examQuestions.map(q => ({
@@ -1101,22 +1111,14 @@ async function saveCurrentPaper(isDraft){
         }
         
         alert(`${isDraft ? 'ড্রাফ্ট' : 'প্রশ্নপত্র'} সফলভাবে সংরক্ষণ করা হয়েছে।`);
-        await recordAdminLogin(isDraft ? 'Draft Saved' : 'Paper Create', authorName);
+        await recordAdminLogin(currentPaperId ? 'Paper Updated' : 'Paper Created', authorName);
         
         // Reset/Go back
-        if(!isDraft) {
-            currentPaperId = null; // Clear ID after final save
-            document.getElementById('createPaperArea').classList.add('hidden');
-            adminPanel.classList.remove('hidden');
-        } else {
-            // Stay in edit mode if it's a draft save, but refresh the papers list on the admin panel if we were editing an existing one
-            // We'll keep currentPaperId set to allow continuous drafting
-            // If the user presses 'Back' (which calls saveCurrentPaper(true)), we go back to the admin panel
-            if(document.getElementById('cancelCreateBtn').clicked){
-                document.getElementById('createPaperArea').classList.add('hidden');
-                adminPanel.classList.remove('hidden');
-            }
-        }
+        currentPaperId = null; // Clear ID after final save
+        originalQuestionsSnapshot = []; // Clear snapshot
+        document.getElementById('createPaperArea').classList.add('hidden');
+        adminPanel.classList.remove('hidden');
+        
         renderPapersList();
     }catch(e){
         console.error(e);
@@ -1124,19 +1126,28 @@ async function saveCurrentPaper(isDraft){
     }
 }
 
+// 4. New function to handle 'Back' without saving
+function cancelPaperEdit() {
+    if (confirm("সংরক্ষণ না করলে আপনার করা সব পরিবর্তন বাতিল হবে। আপনি কি নিশ্চিত?")) {
+        currentPaperId = null; // Clear ID
+        examQuestions = []; // Just clear the in-memory array
+        originalQuestionsSnapshot = []; // Clear snapshot
+        document.getElementById('createPaperArea').classList.add('hidden');
+        adminPanel.classList.remove('hidden');
+    }
+}
 
-// 1. FIX: Display Title correctly
+
+// 2. FIX: Display Title clearly
 async function renderPapersList(){
     if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
     hideAllScreens();
+    document.getElementById('homeActionContainer').classList.add('hidden');
     document.getElementById('pastPapersArea').classList.remove('hidden');
     papersList.innerHTML = 'লোড হচ্ছে...';
+    document.getElementById('resultsArea').innerHTML = ''; // Clear results view on load
     
-    const filterAuthor = document.getElementById('authorFilter').value;
     let query = db.collection(EXAMS_COLLECTION).orderBy('created', 'desc');
-    if(filterAuthor && filterAuthor !== 'all') {
-        query = query.where('authorName', '==', filterAuthor);
-    }
 
     try{
         const snap = await query.get();
@@ -1145,32 +1156,25 @@ async function renderPapersList(){
         if(papers.length === 0){ papersList.textContent = 'কোনো প্রশ্নপত্র পাওয়া যায়নি।'; return; }
         
         papersList.innerHTML = '';
-        const authorSet = new Set(['all']);
         
         papers.forEach(p => {
-            if(p.authorName) authorSet.add(p.authorName);
             
-            // 1. FIX: Display Title correctly
+            // 2. FIX: Display Title clearly at the start
             const status = p.isDraft ? '<span style="color:var(--warning-orange); font-weight:700;">[Draft]</span>' : '';
             const titleText = p.title || 'Untitled Paper';
 
             const item = el('div', {class:'card', style:'margin-bottom:8px; padding:10px;'}, [
-                el('div', {innerHTML: `${status} ${titleText}`, style:'font-weight:bold'}), // Displaying the title
+                el('div', {innerHTML: `<span style="color:var(--primary-blue); font-size:16px;">**${titleText}**</span> ${status}`, style:'font-weight:bold; margin-bottom:5px;'}), 
                 el('div', {class:'small', text:`প্রশ্নকর্তা: ${p.authorName || '—'} | প্রশ্ন সংখ্যা: ${p.questions ? p.questions.length : 0} | সময়: ${p.duration} মিনিট`}),
                 el('div', {class:'actions', style:'margin-top:6px;'}, [
                     el('button', {text:'ফলাফল দেখুন', style:'background:var(--primary-blue); padding:5px 8px; font-size:12px;'}, [], { click: ()=> VIEW_PAPER_RESULTS(p.id, titleText) }),
                     el('button', {text:'কপি লিংক', style:'background:#36A64F; padding:5px 8px; font-size:12px;'}, [], { click: ()=> COPY_EXAM_LINK(p.id) }),
-                    el('button', {text:'সম্পাদনা', style:'background:var(--warning-orange); padding:5px 8px; font-size:12px;'}, [], { click: ()=> EDIT_PAPER(p.id) }),
+                    // 2 & 3. FIX: Changed 'সম্পাদনা' to 'ইডিট করুন'
+                    el('button', {text:'ইডিট করুন', style:'background:var(--warning-orange); padding:5px 8px; font-size:12px;'}, [], { click: ()=> EDIT_PAPER(p.id) }),
                     el('button', {text:'মুছুন', style:'background:var(--danger-red); padding:5px 8px; font-size:12px;'}, [], { click: ()=> DELETE_PAPER(p.id, titleText) })
                 ])
             ]);
             papersList.appendChild(item);
-        });
-
-        // Populate filter dropdown
-        document.getElementById('authorFilter').innerHTML = '';
-        authorSet.forEach(author => {
-            document.getElementById('authorFilter').appendChild(el('option', { value: author, text: author === 'all' ? 'সকল প্রশ্নকর্তা' : author, selected: author === filterAuthor }));
         });
 
     } catch(e){
@@ -1240,7 +1244,7 @@ function DELETE_PAPER(paperId, title){
         });
 }
 
-// 2. FIX: Edit button functionality (Clearing state correctly and setting currentPaperId)
+// 3. FIX: 'ইডিট করুন' functionality (Load all questions into editor)
 async function EDIT_PAPER(paperId){
     if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
     try{
@@ -1249,40 +1253,39 @@ async function EDIT_PAPER(paperId){
         
         const paper = docSnap.data();
         
-        // Populate global state with a FRESH copy of questions
-        examQuestions = JSON.parse(JSON.stringify(paper.questions || [])); 
+        // Take a snapshot of the original questions
+        originalQuestionsSnapshot = JSON.parse(JSON.stringify(paper.questions || []));
+        const loadedQuestions = originalQuestionsSnapshot;
+        
         currentPaperId = paperId; // Set the ID for the saveCurrentPaper update logic
 
         // Populate form fields
         hideAllScreens();
+        document.getElementById('homeActionContainer').classList.add('hidden');
         createPaperArea.classList.remove('hidden');
         paperTitleInput.value = paper.title || '';
         paperDurationInput.value = paper.duration || 0;
         paperAuthorInput.value = paper.authorName || currentAuthor || '';
         
-        // Set default points/negative
-        if(examQuestions.length > 0){
-             document.getElementById('defaultPoint').value = examQuestions[0].point || 1;
-             document.getElementById('defaultNegative').value = examQuestions[0].negative || 0.50;
+        // Set default points/negative from the first question or fallbacks
+        if(loadedQuestions.length > 0){
+             document.getElementById('defaultPoint').value = loadedQuestions[0].point || 1;
+             document.getElementById('defaultNegative').value = loadedQuestions[0].negative || 0.50;
         } else {
              document.getElementById('defaultPoint').value = 1;
              document.getElementById('defaultNegative').value = 0.50;
         }
 
-        // Clear editor and re-render existing questions
-        questionsEditor.innerHTML = '';
-        
-        // Re-add questions one by one, manually pushing to examQuestions to re-index.
-        const tempQuestions = examQuestions;
-        examQuestions = []; 
-        tempQuestions.forEach(q => addQuestionEditor(q));
-
-
         // Date/Time fields
         if (paper.startTime) paperStartInput.value = paper.startTime.toDate().toISOString().slice(0, 16); else paperStartInput.value = '';
         if (paper.endTime) paperEndInput.value = paper.endTime.toDate().toISOString().slice(0, 16); else paperEndInput.value = '';
 
-        alert(`"${paper.title}" সম্পাদনা মোডে লোড হয়েছে।`);
+        // Clear global array and editor, then re-add questions
+        questionsEditor.innerHTML = '';
+        examQuestions = []; 
+        loadedQuestions.forEach(q => addQuestionEditor(q));
+
+        alert(`"${paper.title}" ইডিট মোডে লোড হয়েছে।`);
 
     } catch(e){
         console.error(e);
