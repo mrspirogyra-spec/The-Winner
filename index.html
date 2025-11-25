@@ -60,22 +60,22 @@
     .wrong-ans { color: var(--danger-red); font-weight: 700; }
     .no-ans { color: var(--text-gray); }
     
-    /* NEW: Footer Action Container Positioning */
+    /* 4. Administration button smaller size (more) */
+    #adminBtn {
+        padding: 5px 10px; 
+        font-size: 13px; 
+    }
+
+    /* 5. Footer Action Container Positioning (Raised up slightly) */
     .footer-actions-container {
       max-width: 980px; 
-      margin: 0 auto; 
+      margin: 0 auto 10px auto; /* Added margin-bottom to raise it */
       padding: 16px; 
       text-align: center;
       display: flex;
       justify-content: center;
       gap: 15px;
-      /* Positioning Update: Removed absolute positioning to float above the footer */
-      padding-bottom: 20px; /* Space above the actual footer */
-    }
-    /* 1. Administration button smaller size */
-    #adminBtn {
-        padding: 8px 12px; 
-        font-size: 14px; 
+      padding-bottom: 5px; /* Reduced padding-bottom */
     }
 
     footer{margin-top:18px;text-align:center;font-size:13px;color:var(--text-color);padding:16px 0; background:var(--footer-bg); border-top:1px solid #ddd;}
@@ -83,9 +83,9 @@
     /* Removing the extraneous 'y>' text */
     body::after { content: none; }
     
-    /* 6. Smaller Start/End Time boxes */
+    /* Smaller Start/End Time boxes */
     .datetime-input-small {
-        width: 140px !important; /* Fixed width */
+        width: 140px !important; 
     }
 
     @media(max-width:720px){ 
@@ -97,7 +97,7 @@
         .header-actions{gap:5px;}
         header h1{font-size:18px;}
         .datetime-input-small {
-            width: 100% !important; /* Full width on small screens */
+            width: 100% !important; 
         }
     }
   </style>
@@ -340,7 +340,7 @@ const EXAMS_COLLECTION = 'exams';
 let currentUser = null;
 let isAdmin = false;
 let currentAuthor = null;
-let currentPaperId = null;
+let currentPaperId = null; // Used for editing/updating
 let examQuestions = [];
 let examTimer = null;
 let timeLeftSeconds = 0;
@@ -445,13 +445,17 @@ document.getElementById('closeAdmin').addEventListener('click', ()=> closeAdminP
 document.getElementById('createPaperBtn').addEventListener('click', ()=> openCreatePaper() );
 document.getElementById('viewPapersBtn').addEventListener('click', ()=> renderPapersList() );
 document.getElementById('viewLogBtn').addEventListener('click', ()=> renderLogs() );
-document.getElementById('closePastBtn').addEventListener('click', ()=> { document.getElementById('pastPapersArea').classList.add('hidden'); adminPanel.classList.remove('hidden'); document.getElementById('resultsArea').innerHTML=''; });
+document.getElementById('closePastBtn').addEventListener('click', ()=> { 
+    document.getElementById('pastPapersArea').classList.add('hidden'); 
+    adminPanel.classList.remove('hidden'); 
+    document.getElementById('resultsArea').innerHTML=''; 
+    currentPaperId = null; // Reset paper ID when leaving past papers
+});
 document.getElementById('closeLogBtn').addEventListener('click', ()=> { document.getElementById('logArea').classList.add('hidden'); adminPanel.classList.remove('hidden'); });
 document.getElementById('addQuestionBtn').addEventListener('click', ()=> addQuestionEditor() );
 document.getElementById('savePaperBtn').addEventListener('click', ()=> saveCurrentPaper(false) );
 document.getElementById('cancelCreateBtn').addEventListener('click', ()=> saveCurrentPaper(true) ); 
 
-/* 5. FIX: Re-rendering logic in addQuestionEditor fixes the edit bug */
 document.getElementById('authorNameInput').addEventListener('input', (e)=> populateAuthorSuggestions(e.target.value) );
 document.getElementById('authorFilter').addEventListener('change', ()=> renderPapersList() );
 
@@ -485,6 +489,9 @@ async function renderExamList(){
 
         snap.forEach(doc=>{
             const o = doc.data();
+            // 1. FIX: Ensure exam is not a draft to be shown on homepage
+            if(o.isDraft) return;
+
             const examItem = el('div', {class: 'card exam-item'});
             
             const titleEl = el('div', {text: o.title, style:'font-weight:700; font-size:16px; color:var(--primary-blue);'});
@@ -492,7 +499,6 @@ async function renderExamList(){
             
             const startBtn = el('button', {text:'পরীক্ষা শুরু করুন', style:'background:var(--success-green);'});
             
-            // 3. FIX: Show alert if not logged in
             if(!currentUser){
                 startBtn.addEventListener('click', ()=> alert('অনুগ্রহ করে Log in করুন।'));
             } else {
@@ -570,7 +576,7 @@ function checkUserSession(){
 }
 
 /* -----------------------
-   Dashboard and Previous Exams
+   3. Dashboard and Previous Exams (FIXED)
    ----------------------- */
 function openDashboard(){
     if(!currentUser) return goHome();
@@ -596,12 +602,11 @@ function switchDashboardSection(section){
     } else if(section === 'exams'){
         previousExamsSection.classList.remove('hidden');
         viewPreviousExamsBtn.style.background = 'var(--primary-blue)';
-        // 4. FIX: Call the render function to load previous exams
         renderPreviousExams();
     }
 }
 
-// 4. FIX: Corrected logic for loading previous exams
+// 3. FIX: Corrected logic for loading previous exams
 async function renderPreviousExams(){
     prevExamsList.innerHTML = 'লোড হচ্ছে...';
     if(!currentUser) return;
@@ -611,10 +616,11 @@ async function renderPreviousExams(){
 
         for(const examDoc of allExamsSnap.docs){
             // FIX: Ensure the subcollection query is correctly structured
+            // Querying a subcollection's results for the current user's mobile number
             const resultSnap = await db.collection(EXAMS_COLLECTION).doc(examDoc.id).collection('results')
                                        .where('mobile','==',currentUser.id)
-                                       .orderBy('date','desc')
-                                       .limit(1) // Get only the latest result per exam
+                                       // .orderBy('date','desc') // Removing this as it might cause composite index issues, querying for one user is fast enough
+                                       .limit(1) // Get only one result per exam
                                        .get();
             
             if(!resultSnap.empty){
@@ -622,7 +628,7 @@ async function renderPreviousExams(){
                 results.push({
                     title: examDoc.data().title,
                     score: latestResult.total,
-                    date: fmtDateTime(latestResult.date),
+                    date: latestResult.date,
                     paperId: examDoc.id,
                     resultId: resultSnap.docs[0].id
                 });
@@ -631,7 +637,8 @@ async function renderPreviousExams(){
         
         if(results.length === 0){ prevExamsList.textContent = 'আপনি এখনো কোনো পরীক্ষায় অংশগ্রহণ করেননি।'; return; }
 
-        results.sort((a, b) => b.score - a.score);
+        // Sort results by date (newest first)
+        results.sort((a, b) => b.date.toDate().getTime() - a.date.toDate().getTime());
 
         prevExamsList.innerHTML = '';
         results.forEach(res=>{
@@ -940,11 +947,13 @@ function openCreatePaper(){
     }
     hideAllScreens();
     createPaperArea.classList.remove('hidden');
+    // Clear state for a new paper
     paperTitleInput.value = paperDurationInput.value = '';
     paperStartInput.value = paperEndInput.value = '';
     paperAuthorInput.value = currentAuthor;
     questionsEditor.innerHTML = '';
     examQuestions = [];
+    currentPaperId = null; // Important: Clear ID for new paper
     defaultNegativeInput.value = '0.50'; 
     addQuestionEditor();
 }
@@ -954,7 +963,6 @@ function addQuestionEditor(q={q:'',options:['','','',''],ans:null,point:Number(d
     examQuestions.push(q);
     
     const editor = el('div', {class:'admin-question', 'data-index': index, style:'border:1px solid var(--primary-blue); margin-bottom:15px;'}, [], {
-        // FIX: Re-index array on input/change to prevent duplication/misalignment
         change: () => updateQuestionData(index) 
     });
     
@@ -998,7 +1006,7 @@ function addQuestionEditor(q={q:'',options:['','','',''],ans:null,point:Number(d
 
     editor.appendChild(metaRow);
 
-    // Delete Button (FIXED)
+    // Delete Button
     editor.appendChild(el('div', {style:'text-align:right; margin-top:10px;'}, [
         el('button', {text:'মুছুন', style:'background:var(--danger-red); padding:6px 10px;'}, [], {click: ()=>{
             if(confirm('আপনি কি এই প্রশ্নটি মুছতে চান?')){
@@ -1043,7 +1051,7 @@ function updateQuestionData(index){
 }
 
 
-// 6. FIX: Save button functionality (Correcting the filtering logic for point > 0)
+// 2. FIX: Save button functionality (Updated to use currentPaperId for UPDATE)
 async function saveCurrentPaper(isDraft){
     if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
     
@@ -1065,7 +1073,6 @@ async function saveCurrentPaper(isDraft){
         point: Number(q.point || 0),
         negative: Number(q.negative || 0.50)
     })).filter(q => q.q && q.options.length >= 2 && q.ans !== null && q.point > 0); 
-    // FIX: Changed to q.point > 0 to allow 0 mark questions if needed, but standard is > 0
 
     if(!isDraft && validQuestions.length === 0) {
         return alert('সংরক্ষণ করার জন্য পর্যাপ্ত বৈধ প্রশ্ন নেই। (প্রশ্ন, কমপক্ষে ২টি অপশন, সঠিক উত্তর ও অবশ্যই ১ এর বেশি পয়েন্ট প্রয়োজন।)');
@@ -1077,29 +1084,38 @@ async function saveCurrentPaper(isDraft){
         authorName: authorName || 'Unknown',
         questions: validQuestions,
         isDraft: isDraft,
-        created: firebase.firestore.FieldValue.serverTimestamp(),
+        // Only update 'created' if it's a new paper, otherwise preserve existing timestamp
+        ...(currentPaperId ? {} : {created: firebase.firestore.FieldValue.serverTimestamp()}), 
         startTime: toFirestoreTimestampFromLocalValue(startTime),
         endTime: toFirestoreTimestampFromLocalValue(endTime)
     };
 
     try{
         if(currentPaperId){ 
+            // Existing paper, so update it
             await db.collection(EXAMS_COLLECTION).doc(currentPaperId).update(payload);
         } else {
-            await db.collection(EXAMS_COLLECTION).add(payload);
+            // New paper, so add it
+            const docRef = await db.collection(EXAMS_COLLECTION).add(payload);
+            currentPaperId = docRef.id; // Set the ID for future updates/drafts
         }
         
         alert(`${isDraft ? 'ড্রাফ্ট' : 'প্রশ্নপত্র'} সফলভাবে সংরক্ষণ করা হয়েছে।`);
         await recordAdminLogin(isDraft ? 'Draft Saved' : 'Paper Create', authorName);
-        currentPaperId = null; 
         
         // Reset/Go back
         if(!isDraft) {
+            currentPaperId = null; // Clear ID after final save
             document.getElementById('createPaperArea').classList.add('hidden');
             adminPanel.classList.remove('hidden');
         } else {
-            document.getElementById('createPaperArea').classList.add('hidden');
-            adminPanel.classList.remove('hidden');
+            // Stay in edit mode if it's a draft save, but refresh the papers list on the admin panel if we were editing an existing one
+            // We'll keep currentPaperId set to allow continuous drafting
+            // If the user presses 'Back' (which calls saveCurrentPaper(true)), we go back to the admin panel
+            if(document.getElementById('cancelCreateBtn').clicked){
+                document.getElementById('createPaperArea').classList.add('hidden');
+                adminPanel.classList.remove('hidden');
+            }
         }
         renderPapersList();
     }catch(e){
@@ -1109,7 +1125,7 @@ async function saveCurrentPaper(isDraft){
 }
 
 
-// 5. FIX: Corrected bugs in Past Papers options
+// 1. FIX: Display Title correctly
 async function renderPapersList(){
     if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
     hideAllScreens();
@@ -1134,19 +1150,17 @@ async function renderPapersList(){
         papers.forEach(p => {
             if(p.authorName) authorSet.add(p.authorName);
             
-            // 5. FIX: Display Title correctly (p.title)
+            // 1. FIX: Display Title correctly
             const status = p.isDraft ? '<span style="color:var(--warning-orange); font-weight:700;">[Draft]</span>' : '';
             const titleText = p.title || 'Untitled Paper';
 
             const item = el('div', {class:'card', style:'margin-bottom:8px; padding:10px;'}, [
-                el('div', {innerHTML: `${status} ${titleText}`, style:'font-weight:bold'}),
+                el('div', {innerHTML: `${status} ${titleText}`, style:'font-weight:bold'}), // Displaying the title
                 el('div', {class:'small', text:`প্রশ্নকর্তা: ${p.authorName || '—'} | প্রশ্ন সংখ্যা: ${p.questions ? p.questions.length : 0} | সময়: ${p.duration} মিনিট`}),
                 el('div', {class:'actions', style:'margin-top:6px;'}, [
                     el('button', {text:'ফলাফল দেখুন', style:'background:var(--primary-blue); padding:5px 8px; font-size:12px;'}, [], { click: ()=> VIEW_PAPER_RESULTS(p.id, titleText) }),
-                    // 5. FIX: Copy Link is now functional
                     el('button', {text:'কপি লিংক', style:'background:#36A64F; padding:5px 8px; font-size:12px;'}, [], { click: ()=> COPY_EXAM_LINK(p.id) }),
                     el('button', {text:'সম্পাদনা', style:'background:var(--warning-orange); padding:5px 8px; font-size:12px;'}, [], { click: ()=> EDIT_PAPER(p.id) }),
-                    // 5. FIX: Delete Button is now functional
                     el('button', {text:'মুছুন', style:'background:var(--danger-red); padding:5px 8px; font-size:12px;'}, [], { click: ()=> DELETE_PAPER(p.id, titleText) })
                 ])
             ]);
@@ -1179,7 +1193,7 @@ async function VIEW_PAPER_RESULTS(paperId, title){
                 el('tr', {}, [
                     el('th', {text:'র‍্যাঙ্ক'}), 
                     el('th', {text:'নাম (মোবাইল)'}), 
-                    el('th', {text:'মোট স্কোর'}), 
+                    el('th', {text:'মোট স্কোর'}),
                     el('th', {text:'সঠিক'}),
                     el('th', {text:'ভুল'}),
                     el('th', {text:'তারিখ'})
@@ -1206,7 +1220,6 @@ async function VIEW_PAPER_RESULTS(paperId, title){
     }
 }
 
-// 5. FIX: Delete button functionality
 function DELETE_PAPER(paperId, title){
     const emailPrompt = prompt(`"${title}" প্রশ্নপত্রটি মুছে ফেলতে Owner's Email দিন:`);
     if(emailPrompt !== OWNER_EMAIL){
@@ -1219,8 +1232,6 @@ function DELETE_PAPER(paperId, title){
     db.collection(EXAMS_COLLECTION).doc(paperId).delete()
         .then(() => {
             alert(`"${title}" প্রশ্নপত্রটি মুছে ফেলা হয়েছে।`);
-            // Also need to delete the subcollection (results) but Firestore doesn't allow recursive delete in client SDK. 
-            // We'll rely on the rule that if the parent is gone, the results are inaccessible.
             renderPapersList();
         })
         .catch(error => {
@@ -1229,7 +1240,7 @@ function DELETE_PAPER(paperId, title){
         });
 }
 
-// 5. FIX: Edit button functionality (fixing the question duplication/auto-increment issue)
+// 2. FIX: Edit button functionality (Clearing state correctly and setting currentPaperId)
 async function EDIT_PAPER(paperId){
     if(!isAdmin) return alert('অ্যাডমিন লগইন প্রয়োজন');
     try{
@@ -1238,9 +1249,9 @@ async function EDIT_PAPER(paperId){
         
         const paper = docSnap.data();
         
-        // Populate global state with a FRESH copy of questions (important for re-rendering)
+        // Populate global state with a FRESH copy of questions
         examQuestions = JSON.parse(JSON.stringify(paper.questions || [])); 
-        currentPaperId = paperId; // Set the ID for update
+        currentPaperId = paperId; // Set the ID for the saveCurrentPaper update logic
 
         // Populate form fields
         hideAllScreens();
@@ -1249,7 +1260,7 @@ async function EDIT_PAPER(paperId){
         paperDurationInput.value = paper.duration || 0;
         paperAuthorInput.value = paper.authorName || currentAuthor || '';
         
-        // Set default points/negative from the first question for display consistency
+        // Set default points/negative
         if(examQuestions.length > 0){
              document.getElementById('defaultPoint').value = examQuestions[0].point || 1;
              document.getElementById('defaultNegative').value = examQuestions[0].negative || 0.50;
@@ -1262,7 +1273,6 @@ async function EDIT_PAPER(paperId){
         questionsEditor.innerHTML = '';
         
         // Re-add questions one by one, manually pushing to examQuestions to re-index.
-        // We use a temporary copy of the array and clear the actual array before adding.
         const tempQuestions = examQuestions;
         examQuestions = []; 
         tempQuestions.forEach(q => addQuestionEditor(q));
@@ -1280,7 +1290,6 @@ async function EDIT_PAPER(paperId){
     }
 }
 
-// 5. FIX: Copy Link is now functional
 function COPY_EXAM_LINK(paperId){
     const link = `${window.location.origin}${window.location.pathname}?examId=${paperId}`;
     navigator.clipboard.writeText(link)
@@ -1293,8 +1302,6 @@ function COPY_EXAM_LINK(paperId){
         });
 }
 
-// --- Other Admin Functions (Student List, Logs etc.) would follow here ---
-
 /* -----------------------
    Page load handling
    ----------------------- */
@@ -1303,7 +1310,6 @@ window.addEventListener('load', ()=>{
     const urlParams = new URLSearchParams(window.location.search);
     const examId = urlParams.get('examId');
     if (examId) {
-        // Attempt to load exam details if an ID is provided
         db.collection(EXAMS_COLLECTION).doc(examId).get().then(doc => {
             if(doc.exists){
                 const paper = doc.data();
@@ -1311,7 +1317,7 @@ window.addEventListener('load', ()=>{
                     beginExamFlow(doc.id, paper);
                 } else {
                     alert(`পরীক্ষা শুরু করতে হলে আপনাকে আগে লগইন করতে হবে। পরীক্ষার নাম: ${paper.title || 'শিরোনাম নেই'}`);
-                    goHome(); // Go to home to show login/register buttons
+                    goHome(); 
                 }
             } else {
                 alert('এই পরীক্ষার লিংকটি বৈধ নয় বা পরীক্ষাটি মুছে ফেলা হয়েছে।');
